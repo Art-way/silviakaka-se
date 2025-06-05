@@ -29,8 +29,8 @@ module.exports = {
             },
         },
         fontFamily: {
-            poppins: ['Poppins', 'sans-serif'], 
-            sora: ['Sora', 'sans-serif'],      
+            poppins: ['var(--font-poppins)', 'sans-serif'],
+            sora: ['var(--font-sora)', 'sans-serif'],
         },
     },
     plugins: [

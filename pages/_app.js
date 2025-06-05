@@ -20,8 +20,8 @@ const MyApp = ({ Component, pageProps }) => {
     return (
         <div className="bg-dark-blue">
             <Head>
-                <title>Next.js</title>
-                <link rel="icon" href="/favicon.png" />
+                <title>Silviakaka</title>
+              
             </Head>
             <Script
                 strategy="afterInteractive"

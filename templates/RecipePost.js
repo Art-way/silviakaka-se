@@ -15,7 +15,7 @@ const RecipeTemplate = ({ post, pageContext }) => {
     const recipe = post;
     const otherRecipes = pageContext.otherRecipes;
 
-    const schemaAuthor = config.author || { "@type": "Organization", "name": "Silviakaka.se" };
+    const schemaAuthor = config.author || { "@type": "Organization", "name": "Silviakaka" };
 
     const recipeSchema = {
         "@context": "https://schema.org/",
@@ -51,12 +51,14 @@ const RecipeTemplate = ({ post, pageContext }) => {
     };
     
     const mainDescription = recipe.description || "<p>Detta recept väntar på en läcker beskrivning!</p>";
-
+    const ogImageUrl = recipe.image && recipe.image[0] ? recipe.image[0].url : null;
     return (
         <Layout 
             additionalClass={['bg-light-gray']} 
-            title={`${recipe.name} | ${config.siteMetadata.title}`}
+            title={`${recipe.name}`}
             description={mainDescription.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...'}
+            ogImage={ogImageUrl}
+            ogType="article" 
         >
             <Head>
                 <script

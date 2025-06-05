@@ -79,7 +79,7 @@ const CustomPagination = ({ currentPage, numPages, prevText = 'Föregående', ne
     return (
         <nav className={['flex items-center justify-center space-x-px my-10 md:my-12', ...additionalClasses].join(' ')} aria-label="Sidnumrering">
             {!isFirstPageActive ? (
-                <Link href={getRecipePageLink(CcurrentPage - 1)} className={`${commonLinkClasses} ${defaultLinkClasses} rounded-l-md`}>
+                <Link href={getRecipePageLink(CcurrentPage - 1)} title="Gå till föregående sida" className={`${commonLinkClasses} ${defaultLinkClasses} rounded-l-md`}>
                     {prevText}
                 </Link>
             ) : (
@@ -109,6 +109,7 @@ const CustomPagination = ({ currentPage, numPages, prevText = 'Föregående', ne
                     <Link
                         key={`page-${page}`}
                         href={pageLink}
+                        title={`Gå till sida ${page}`}
                         className={`${commonLinkClasses} ${isCurrent ? activeLinkClasses : defaultLinkClasses} ${roundedClasses}`}
                         aria-current={isCurrent ? 'page' : undefined}
                     >
@@ -118,7 +119,7 @@ const CustomPagination = ({ currentPage, numPages, prevText = 'Föregående', ne
             })}
 
             {!isLastPageActive ? (
-                <Link href={getRecipePageLink(CcurrentPage + 1)} className={`${commonLinkClasses} ${defaultLinkClasses} rounded-r-md`}>
+                <Link href={getRecipePageLink(CcurrentPage + 1)} title="Gå till nästa sida" className={`${commonLinkClasses} ${defaultLinkClasses} rounded-r-md`}>
                     {nextText}
                 </Link>
             ) : (

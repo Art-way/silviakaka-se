@@ -68,7 +68,7 @@ const Footer = () => (
         <div className="md:w-auto px-5 md:px-0 mt-8
                 flex flex-col items-center space-y-5 md:space-y-8"
         >
-            <Link href="/">
+            <Link href="/" title={`${config.siteMetadata.title} Logotyp`}>
                 <div className="block w-[82px] md:w-[103px] h-8 md:h-12 relative cursor-pointer">
                     <Image
                         src="/assets/recipe-logo.png" // Ensure this is your Silviakaka.se logo
@@ -83,6 +83,7 @@ const Footer = () => (
                     <a
                         key={item.name}
                         href={item.href}
+                        title={item.name}
                         target="_blank"
                         className="text-gray hover:text-gray-500 p-3" // Tailwind's `gray` might need to be `text-gray-500` depending on your config
                         rel="noopener noreferrer" // Added noopener for security
@@ -95,10 +96,10 @@ const Footer = () => (
         </div>
    
             <div className="mt-8 mb-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 justify-center">
-                <Link href="/om-oss" className="text-sm text-gray-600 hover:text-secondary hover:underline">
+                <Link href="/om-oss" title="Läs mer om oss" className="text-sm text-gray-600 hover:text-secondary hover:underline">
                     Om Oss
                 </Link>
-                <Link href="/kontakta-oss" className="text-sm text-gray-600 hover:text-secondary hover:underline">
+                <Link href="/kontakta-oss" title="Läs mer Kontakta Oss" className="text-sm text-gray-600 hover:text-secondary hover:underline">
                     Kontakta Oss
                 </Link>
             </div>

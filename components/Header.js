@@ -68,6 +68,7 @@ const PageHeader = () => {
                                             <Link
                                                 key={item.name}
                                                 href={item.href}
+                                                title={`Gå till ${item.name}`}
                                                 className={classNames(
                                                     router.pathname === item.href
                                                         ? 'text-secondary border-secondary'
