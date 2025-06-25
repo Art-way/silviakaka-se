@@ -8,7 +8,10 @@ import { getRecipe, getAllRecipes } from '../../../lib/recipe'; // Path is now d
 import replaceUndefinedWithNull from '../../../lib/sanitize'; // Path is now deeper
 import { Header, Paragraph } from 'flotiq-components-react';
 import { getRecipePageLink } from '../../../lib/utils';
+import { getTranslations } from '../../../lib/translations'; // استيراد دالة الترجمة
+import { useTranslation } from '../../../context/TranslationContext'; // استيراد الهوك
 const RecipeListPage = ({ recipes, pageContext }) => { // Renamed component
+    const { t } = useTranslation();
     const pageTitle = `Alla Våra Recept - Sida ${pageContext.currentPage} | ${config.siteMetadata.title}`;
     const pageDescription = `Bläddra bland alla läckra recept på ${config.siteMetadata.title}. Sida ${pageContext.currentPage} av ${pageContext.numPages}.`;
     const canonicalUrl = `${config.siteMetadata.siteUrl}/recept/list/${pageContext.currentPage}`;
@@ -75,6 +78,7 @@ const RecipeListPage = ({ recipes, pageContext }) => { // Renamed component
 };
 
 export async function getStaticProps({ params }) {
+    const { translations } = await getTranslations();
     const page = parseInt(params.pageNumber, 10);
     if (isNaN(page) || page < 2) { // Validate page number
         return { notFound: true };
@@ -96,7 +100,8 @@ export async function getStaticProps({ params }) {
                 numPages: recipesResponse.total_pages,
                 totalRecipesOnPage: recipesResponse.count,
                 recipesPerPage: recipesPerPage
-            },
+          },
+            translations, // تمرير الترجمات إلى الصفحة
         },
     };
 }

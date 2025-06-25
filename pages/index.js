@@ -1,183 +1,146 @@
+
 import React from 'react';
 import Head from 'next/head';
-import Layout from '../layouts/layout';
-import config from '../lib/config';
-import { Header, Paragraph, Button } from 'flotiq-components-react';
 import Link from 'next/link';
-import RecipeFeaturedCard from '../components/RecipeFeaturedCard';
-import RecipeCards from '../sections/RecipeCards';
-import { getRecipe, getRecipeBySlug } from '../lib/recipe';
+import Image from 'next/image';
+import Layout from '../layouts/layout';
+import { getRecipe } from '../lib/recipe';
 import replaceUndefinedWithNull from '../lib/sanitize';
+import { Button } from 'flotiq-components-react';
+import { StarIcon } from '@heroicons/react/solid';
+import { getTranslations } from '../lib/translations'; 
+import { useTranslation } from '../context/TranslationContext'; // استيراد الهوك من الملف الصحيح
 
-// Component name can remain HomePage or change to IndexPage, etc.
-const HomePage = ({ featuredSilviakaka, featuredKladdkaka, latestRecipes }) => {
-    const pageTitle = `${config.siteMetadata.title} - Klassiska Svenska Recept`;
-    const pageDescription = `Välkommen till ${config.siteMetadata.title}! Upptäck de bästa recepten på Silviakaka, Kladdkaka och andra svenska bakverk.`;
-    const pageUrl = `${config.siteMetadata.siteUrl}/`;
-
-    const homePageSchema = {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": pageTitle,
-        "description": pageDescription,
-        "url": pageUrl,
-        "publisher": {
-            "@type": "Organization",
-            "name": config.siteMetadata.title,
-            "logo": {
-                "@type": "ImageObject",
-                "url": `${config.siteMetadata.siteUrl}/assets/recipe-logo.svg`
-            }
-        },
-        "mainEntity": [
-            ...(featuredSilviakaka ? [{
-                "@type": "WebPageElement",
-                "name": "Silviakaka Höjdpunkter",
-                "url": `${config.siteMetadata.siteUrl}/silviakaka`
-            }] : []),
-            ...(featuredKladdkaka ? [{
-                "@type": "WebPageElement",
-                "name": "Kladdkaka Höjdpunkter",
-                "url": `${config.siteMetadata.siteUrl}/kladdkaka`
-            }] : []),
-        ]
-    };
-
-    const latestRecipesSchema = latestRecipes && latestRecipes.length > 0 ? {
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        "name": "Senaste Recepten på Silviakaka.se",
-        "itemListElement": latestRecipes.map((recipe, index) => ({
-            "@type": "ListItem",
-            "position": index + 1,
-            "item": {
-                "@type": "Recipe",
-                "name": recipe.name,
-                "url": `${config.siteMetadata.siteUrl}/recept/${recipe.slug}`,
-                "image": recipe.image && recipe.image[0] ? `${config.siteMetadata.siteUrl}${recipe.image[0].url}` : undefined,
-                "description": recipe.description ? recipe.description.replace(/<[^>]*>?/gm, '').substring(0,100) + '...' : undefined
-            }
-        }))
-    } : null;
-
+const RecipeCard = ({ recipe }) => {
+    if (!recipe) return null;
     return (
-        <Layout
-            title={pageTitle}
-            description={pageDescription}
-            additionalClass={['bg-light-gray']}
-        >
-            <Head>
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(homePageSchema) }}
-                />
-                {latestRecipesSchema && (
-                    <script
-                        type="application/ld+json"
-                        dangerouslySetInnerHTML={{ __html: JSON.stringify(latestRecipesSchema) }}
+        <Link href={`/recept/${recipe.slug}`} passHref>
+            <div className="block bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden group">
+                <div className="relative">
+                    <Image
+                        src={recipe.image?.[0]?.url || '/images/placeholder.jpg'}
+                        alt={recipe.name}
+                        width={400}
+                        height={250}
+                        className="w-full h-48 object-cover transform group-hover:scale-110 transition-transform duration-300"
                     />
-                )}
-            </Head>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-                <Header level={1} additionalClasses={['text-4xl md:text-5xl font-bold text-primary mb-4 text-center']}>
-                    Välkommen till Silviakaka.se!
-                </Header>
-                <Paragraph additionalClasses={['text-xl text-gray-700 text-center mb-12']}>
-                    Din guide till den perfekta Silviakakan, Kladdkakan och mycket mer.
-                </Paragraph>
-
-                {featuredSilviakaka && (
-                    <div className="mb-16">
-                        <Header level={2} additionalClasses={['text-3xl font-semibold text-secondary mb-6']}>
-                            Allt om Silviakaka
-                        </Header>
-                        <RecipeFeaturedCard
-                            title={featuredSilviakaka.name}
-                            excerpt={featuredSilviakaka.description.replace(/<[^>]*>?/gm, '').substring(0, 200) + '...'}
-                            preparationTime={featuredSilviakaka.prepTime}
-                            cookTime={featuredSilviakaka.cookTime}
-                            portions={featuredSilviakaka.servings}
-                            image={featuredSilviakaka.image[0]}
-                            imageAlt={featuredSilviakaka.name}
-                            slug={featuredSilviakaka.slug} // slug passed to RecipeFeaturedCard for its internal link
-                        />
-                        <div className="text-center mt-6">
-                            <Link href="/silviakaka">
-                                <Button label="Utforska allt om Silviakaka" variant="secondary" />
-                            </Link>
+                    <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-40 transition-opacity duration-300"></div>
+                    <div className="absolute bottom-0 left-0 p-4">
+                         <h3 className="text-white text-xl font-bold font-sora">{recipe.name}</h3>
+                    </div>
+                </div>
+                <div className="p-4">
+                    <p className="text-gray-600 text-sm line-clamp-3 mb-3">
+                        {recipe.description.replace(/<[^>]*>?/gm, '')}
+                    </p>
+                    <div className="flex justify-between items-center text-sm text-gray-500">
+                        <span>{recipe.cookingTime.replace('PT','').replace('M', ' min')}</span>
+                        <div className="flex items-center">
+                             <StarIcon className="h-5 w-5 text-yellow-400 mr-1" />
+                            <span>{recipe.aggregateRating?.ratingValue || 'N/A'}</span>
                         </div>
                     </div>
-                )}
-
-                {featuredKladdkaka && (
-                    <div className="mb-16">
-                        <Header level={2} additionalClasses={['text-3xl font-semibold text-secondary mb-6']}>
-                            Kladdkakans Värld
-                        </Header>
-                        <RecipeFeaturedCard
-                            title={featuredKladdkaka.name}
-                            excerpt={featuredKladdkaka.description.replace(/<[^>]*>?/gm, '').substring(0, 200) + '...'}
-                            preparationTime={featuredKladdkaka.prepTime}
-                            cookTime={featuredKladdkaka.cookTime}
-                            portions={featuredKladdkaka.servings}
-                            image={featuredKladdkaka.image[0]}
-                            imageAlt={featuredKladdkaka.name}
-                            slug={featuredKladdkaka.slug} // slug passed to RecipeFeaturedCard for its internal link
-                        />
-                        <div className="text-center mt-6">
-                            <Link href="/kladdkaka">
-                                <Button label="Utforska alla Kladdkakerecept" variant="secondary" />
-                            </Link>
-                        </div>
-                    </div>
-                )}
-
-                {latestRecipes && latestRecipes.length > 0 && (
-                    <div className="mt-12">
-                        <RecipeCards recipes={latestRecipes} headerText="Senaste Recepten" />
-                        <div className="text-center mt-8">
-                            {/* This link will now point to the first page of the new all-recipes listing */}
-                            <Link href="/recept"> {/* This should now correctly go to pages/recept/index.js */}
-    <Button label="Visa alla recept" />
-</Link>
-                        </div>
-                    </div>
-                )}
+                </div>
             </div>
+        </Link>
+    );
+};
+
+
+const HomePage = ({ featuredRecipe, latestRecipes }) => {
+    const { t } = useTranslation(); // الآن يجب أن يعمل هذا بشكل صحيح
+
+    if (!featuredRecipe) {
+        return (
+            <Layout>
+                <div className="text-center py-20">
+                    <p>Kunde inte ladda recept. Försök igen senare.</p>
+                </div>
+            </Layout>
+        );
+    }
+    
+    return (
+        <Layout>
+            <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center text-center bg-gray-700 text-white">
+                <Image
+                    src={featuredRecipe.image?.[0]?.url || '/images/placeholder.jpg'}
+                    alt={featuredRecipe.name}
+                    layout="fill"
+                    objectFit="cover"
+                    className="absolute inset-0 z-0 opacity-50"
+                    priority
+                />
+                <div className="relative z-10 p-5">
+                    <h1 className="text-4xl md:text-6xl font-extrabold font-sora drop-shadow-lg mb-4">
+                        {featuredRecipe.name}
+                    </h1>
+                    <p className="max-w-2xl mx-auto text-lg md:text-xl mb-8 drop-shadow-md">
+                        {featuredRecipe.description.replace(/<[^>]*>?/gm, '').substring(0, 150)}...
+                    </p>
+                    <Link href={`/recept/${featuredRecipe.slug}`} passHref>
+                        <Button
+                            label={t('read_the_recipe')}
+                            variant="secondary"
+                            size="lg"
+                            additionalClasses={['!text-lg !font-bold']}
+                        />
+                    </Link>
+                </div>
+            </section>
+             <section className="bg-gray-50 py-16">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                         <h2 className="text-3xl md:text-4xl font-bold text-primary font-sora">
+                            {t('latest_recipes')}
+                         </h2>
+                         <p className="text-lg text-gray-600 mt-2">
+                            {t('fresh_from_oven')}
+                         </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {latestRecipes.map((recipe) => (
+                            <RecipeCard key={recipe.id} recipe={recipe} />
+                        ))}
+                    </div>
+
+                    <div className="text-center mt-12">
+                        <Link href="/recept" passHref>
+                            <Button label={t('show_all_recipes')} variant="primary" />
+                        </Link>
+                    </div>
+                </div>
+            </section>
         </Layout>
     );
 };
 
-// getStaticProps is for fetching data for this specific homepage
-export async function getStaticProps() { // No params needed as it's not dynamic based on URL param
-    const silviakakaPillarResponse = await getRecipeBySlug('silviakaka');
-    const featuredSilviakaka = (silviakakaPillarResponse?.data?.[0])
-        ? replaceUndefinedWithNull(silviakakaPillarResponse.data[0])
-        : null;
-
-    const kladdkakaPillarResponse = await getRecipeBySlug('kladdkaka-recept');
-    const featuredKladdkaka = (kladdkakaPillarResponse?.data?.[0])
-        ? replaceUndefinedWithNull(kladdkakaPillarResponse.data[0])
-        : null;
+export async function getStaticProps() {
+    const { translations } = await getTranslations();
     
-    const latestRecipesResponse = await getRecipe(1, 3, undefined, 'desc', 'datePublished');
-    let latestRecipes = (latestRecipesResponse?.data)
-        ? replaceUndefinedWithNull(latestRecipesResponse.data)
-        : [];
+    try {
+        const recipesResponse = await getRecipe(1, 4, undefined, 'desc', 'datePublished');
 
-    const pillarSlugs = [featuredSilviakaka?.slug, featuredKladdkaka?.slug].filter(Boolean);
-    latestRecipes = latestRecipes.filter(recipe => !pillarSlugs.includes(recipe.slug)).slice(0,3);
+        if (!recipesResponse || !recipesResponse.data || recipesResponse.data.length === 0) {
+            return { props: { featuredRecipe: null, latestRecipes: [], translations } };
+        }
 
-    return {
-        props: {
-            featuredSilviakaka,
-            featuredKladdkaka,
-            latestRecipes,
-            // No pageContext needed for pagination on this specific homepage
-        },
-    };
+        const allRecipes = replaceUndefinedWithNull(recipesResponse.data);
+        const featuredRecipe = allRecipes[0];
+        const latestRecipes = allRecipes.slice(1, 4);
+
+        return {
+            props: {
+                featuredRecipe,
+                latestRecipes,
+                translations,
+            },
+        };
+    } catch(error) {
+         console.error("Error in getStaticProps for index page:", error);
+         return { props: { featuredRecipe: null, latestRecipes: [], translations } };
+    }
 }
-
-// No getStaticPaths needed for pages/index.js
 
 export default HomePage;

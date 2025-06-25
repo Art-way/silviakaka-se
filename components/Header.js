@@ -5,37 +5,34 @@ import { MenuIcon, XIcon, ChevronDownIcon } from '@heroicons/react/outline';
 import Image from 'next/image';
 import config from '../lib/config';
 import { useRouter } from 'next/router';
-import SearchWidget from './SearchWidget'; // Import the search component
-import { getAllRecipes } from '../lib/recipe'; // To fetch all recipes for search
-
-// Define navigation items including the dropdown
-const navigationLinks = [
-    { name: 'Hem', href: '/', type: 'link' },
-    {
-        name: 'Recept',
-        type: 'dropdown',
-        href: '/recept', // Main link for "All Recipes" (page 1)
-        subLinks: [
-            { name: 'Alla Recept', href: '/recept' }, // Links to page 1 of all recipes
-            { name: 'Silviakaka Guiden', href: '/silviakaka' }, // Pillar page
-            { name: 'Kladdkaka Guiden', href: '/kladdkaka' },   // Pillar page
-        ],
-    },
-    { name: 'Om Oss', href: '/om-oss', type: 'link' },
-    { name: 'Kontakta Oss', href: '/kontakta-oss', type: 'link' },
-];
-
-function classNames(...classes) {
-    return classes.filter(Boolean).join(' ');
-}
+import SearchWidget from './SearchWidget';
+import { getAllRecipes } from '../lib/recipe';
+import { useTranslation } from '../context/TranslationContext'; // استيراد الهوك
 
 const PageHeader = () => {
+    const { t } = useTranslation(); // استخدام الهوك
     const router = useRouter();
     const [allRecipesForSearch, setAllRecipesForSearch] = useState([]);
 
+    const navigationLinks = [
+        { name: t('home'), href: '/', type: 'link' },
+        {
+            name: t('recipes'),
+            type: 'dropdown',
+            href: '/recept',
+            subLinks: [
+                { name: t('all_recipes'), href: '/recept' },
+                { name: t('silviakaka_guide'), href: '/silviakaka' },
+                { name: t('kladdkaka_guide'), href: '/kladdkaka' },
+            ],
+        },
+        { name: t('about_us'), href: '/om-oss', type: 'link' },
+        { name: t('contact_us'), href: '/kontakta-oss', type: 'link' },
+    ];
+
     useEffect(() => {
         const fetchAllDataForSearch = async () => {
-            const recipeData = await getAllRecipes(); // This fetches all recipe objects
+            const recipeData = await getAllRecipes();
             if (recipeData && recipeData.data) {
                 setAllRecipesForSearch(recipeData.data);
             }
@@ -43,8 +40,12 @@ const PageHeader = () => {
         fetchAllDataForSearch();
     }, []);
 
+    function classNames(...classes) {
+        return classes.filter(Boolean).join(' ');
+    }
+
     return (
-        <Disclosure as="nav" className="bg-white shadow-md sticky top-0 z-50">
+ <Disclosure as="nav" className="bg-white shadow-md sticky top-0 z-50">
             {({ open }) => (
                 <>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,7 +59,7 @@ const PageHeader = () => {
                                             alt={`${config.siteMetadata.title} Logotyp`}
                                             width={140}
                                             height={55}
-                                            priority // Prioritize logo loading
+                                            priority
                                         />
                                     </Link>
                                 </div>
@@ -70,9 +71,7 @@ const PageHeader = () => {
                                                 href={item.href}
                                                 title={`Gå till ${item.name}`}
                                                 className={classNames(
-                                                    router.pathname === item.href
-                                                        ? 'text-secondary border-secondary'
-                                                        : 'text-gray-600 hover:text-secondary hover:border-gray-300 border-transparent',
+                                                    router.pathname === item.href ? 'text-secondary border-secondary' : 'text-gray-600 hover:text-secondary hover:border-gray-300 border-transparent',
                                                     'inline-flex items-center px-1 pt-1 border-b-2 text-base lg:text-lg font-medium transition-all duration-150 ease-in-out'
                                                 )}
                                                 aria-current={router.pathname === item.href ? 'page' : undefined}
@@ -88,7 +87,7 @@ const PageHeader = () => {
                                                         : 'text-gray-600 hover:text-secondary hover:border-gray-300 border-transparent',
                                                         'inline-flex items-center px-1 pt-1 border-b-2 text-base lg:text-lg font-medium group transition-all duration-150 ease-in-out'
                                                     )}>
-                                                        <Link href={item.href} className="group-hover:text-secondary transition-colors">
+                                                        <Link href={item.href}  title={`Gå till ${item.name}`} className="group-hover:text-secondary transition-colors">
                                                             {item.name}
                                                         </Link>
                                                         <ChevronDownIcon
@@ -132,13 +131,13 @@ const PageHeader = () => {
                             </div>
 
                             {/* Desktop Search Widget & Mobile Menu Button Group */}
-                            <div className="flex items-center">
+                              <div className="flex items-center">
                                 <div className="hidden md:ml-4 md:flex md:items-center">
-                                    <SearchWidget allRecipesData={allRecipesForSearch} placeholder="Sök recept här..." />
+                                    <SearchWidget allRecipesData={allRecipesForSearch} placeholder={t('search_placeholder')} />
                                 </div>
-                                <div className="md:hidden ml-4"> {/* Mobile menu button */}
+                                <div className="md:hidden ml-4">
                                     <Disclosure.Button className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-secondary">
-                                        <span className="sr-only">Öppna huvudmenyn</span>
+                                        <span className="sr-only">{t('open_main_menu')}</span>
                                         {open ? (
                                             <XIcon className="block h-7 w-7" aria-hidden="true" />
                                         ) : (

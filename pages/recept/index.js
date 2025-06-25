@@ -8,7 +8,10 @@ import { getRecipe } from '../../lib/recipe';
 import replaceUndefinedWithNull from '../../lib/sanitize';
 import { Header, Paragraph } from 'flotiq-components-react';
 import { getRecipePageLink } from '../../lib/utils';
+import { getTranslations } from '../../lib/translations'; // استيراد دالة الترجمة
+import { useTranslation } from '../../context/TranslationContext'; // استيراد الهوك
 const RecipeIndexPage = ({ recipes, pageContext }) => {
+      const { t } = useTranslation();
     const pageTitle = `Alla Våra Recept | ${config.siteMetadata.title}`; // Page 1 doesn't need "Sida 1"
     const pageDescription = `Bläddra bland alla läckra recept på ${config.siteMetadata.title}. Upptäck nya favoriter!`;
     const canonicalUrl = `${config.siteMetadata.siteUrl}/recept`;
@@ -72,6 +75,7 @@ const RecipeIndexPage = ({ recipes, pageContext }) => {
 };
 
 export async function getStaticProps() {
+    const { translations } = await getTranslations();
     const page = 1; // This page is always page 1
     const recipesPerPage = config.blog.postPerPage;
     const recipesResponse = await getRecipe(page, recipesPerPage, undefined, 'desc', 'datePublished');
@@ -82,11 +86,11 @@ export async function getStaticProps() {
         props: {
             recipes: sanitizedRecipes,
             pageContext: {
-                currentPage: page, // Always 1
+                currentPage: page,
                 numPages: recipesResponse.total_pages,
-                totalRecipesOnPage: recipesResponse.count,
                 recipesPerPage: recipesPerPage
             },
+            translations, // تمرير الترجمات إلى الصفحة
         },
     };
 }

@@ -3,7 +3,7 @@ import RecipeTemplate from '../../templates/RecipePost'; // This will be used fo
 import { getRecipe, getRecipeBySlug, getAllRecipeSlugs } from '../../lib/recipe';
 import replaceUndefinedWithNull from '../../lib/sanitize';
 import config from '../../lib/config';
-
+import { getTranslations } from '../../lib/translations';
 const RecipeDetailPage = ({ postData, pageContext }) => { // Renamed to avoid conflict
     return <RecipeTemplate post={postData} pageContext={pageContext} />;
 };
@@ -23,13 +23,14 @@ export async function getStaticProps({ params }) {
     const sanitizedOtherRecipes = replaceUndefinedWithNull(otherRecipesResponse.data)
                                     .filter(recipe => recipe.id !== currentRecipe.id)
                                     .slice(0, config.blog.postPerPage);
-    
+    const { translations } = await getTranslations();
     return {
         props: {
             postData: currentRecipe, // 'post' is used by RecipeTemplate
             pageContext: {
                 otherRecipes: sanitizedOtherRecipes,
             },
+            translations,
         },
     };
 }
