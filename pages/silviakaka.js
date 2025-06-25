@@ -2,12 +2,15 @@ import React from 'react';
 import Head from 'next/head';
 import Layout from '../layouts/layout';
 import { Header, Paragraph } from 'flotiq-components-react';
-import config from '../lib/config';
-import RecipeCard from '../components/RecipeCard'; // We'll use this to list recipes
-import { getRecipe } from '../lib/recipe'; // To fetch the recipes
+import RecipeCard from '../components/RecipeCard';
+import { getRecipe } from '../lib/recipe';
 import replaceUndefinedWithNull from '../lib/sanitize';
-import FlotiqImage from '../lib/FlotiqImage'; // For recipe card images
-
+import FlotiqImage from '../lib/FlotiqImage';
+import { getTranslations } from '../lib/translations';
+import { useTranslation } from '../context/TranslationContext';
+import fs from 'fs';
+import path from 'path';
+import config from '../lib/config'; // <-- تم إضافة هذا السطر لتصحيح الخطأ
 // Define which slugs belong to the Silviakaka silo
 const silviakakaRecipeSlugs = [
     "silviakaka", // The classic recipe itself
@@ -26,10 +29,16 @@ const silviakakaRecipeSlugs = [
     "silviakaka-lindas-bakskola"
 ];
 
-const SilviakakaPillarPage = ({ recipesInSilo }) => {
-    const pageTitle = `Allt om Silviakaka - Recept & Tips | ${config.siteMetadata.title}`;
-    const pageDescription = "Din kompletta guide till Silviakaka! Upptäck klassiska recept, spännande variationer, bakningstips, och allt du behöver veta för att baka den perfekta Silviakakan.";
+const SilviakakaPillarPage = ({ recipesInSilo, pageContent }) => {
+       const { t } = useTranslation();
 
+    // دالة مساعدة للحصول على النص باللغة الصحيحة
+    const translateContent = (field) => {
+        if (typeof field === 'object' && field !== null) {
+            return field[pageContent.lang] || field['sv'];
+        }
+        return field;
+    };
     const itemListSchema = {
         "@context": "https://schema.org",
         "@type": "ItemList",
@@ -44,46 +53,38 @@ const SilviakakaPillarPage = ({ recipesInSilo }) => {
     };
 
     return (
-        <Layout title={pageTitle} description={pageDescription}>
+        <Layout title={translateContent(pageContent.title)} description={translateContent(pageContent.meta_description)}>
             <Head>
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
                 />
             </Head>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
                 <Header level={1} additionalClasses={['text-4xl md:text-5xl font-bold text-primary mb-8 text-center']}>
-                    Silviakaka – En Älskad Svensk Klassiker
+                    {translateContent(pageContent.headline)}
                 </Header>
                 
                 <div className="prose prose-lg lg:prose-xl max-w-3xl mx-auto text-gray-700 mb-12">
-                    <Paragraph>
-                        Välkommen till den ultimata guiden för Silviakaka! Här på Silviakaka.se har vi samlat allt du
-                        behöver veta om denna otroligt populära och älskade svenska kaka. Från dess spännande historia
-                        till det klassiska grundreceptet, smarta baktips för att garantera en saftig kaka varje gång,
-                        och hur du gör den oemotståndliga smörkrämsglasyren.
-                    </Paragraph>
-                    <Paragraph>
-                        Utforska våra många recept nedan för att hitta din favoritvariant – oavsett om du vill
-                        baka den i långpanna, som muffins, glutenfri, vegansk, eller med spännande smaksättningar
-                        som saffran eller citron. Glad bakning!
-                    </Paragraph>
-                    {/* Add more introductory content, history, general tips, FAQ here */}
+                   {translateContent(pageContent.body).split('\n').map((paragraph, index) => (
+                         <Paragraph key={index}>
+                            {paragraph}
+                        </Paragraph>
+                    ))}
                 </div>
 
                 <Header level={2} additionalClasses={['text-3xl font-semibold text-secondary mb-10 text-center']}>
-                    Våra Silviakaka Recept
+                    {t('our_silviakaka_recipes')}
                 </Header>
                 <div className="flex flex-wrap -mx-2">
                     {recipesInSilo.map((recipe) => (
                         <RecipeCard
                             key={recipe.id}
                             name={recipe.name}
-                            slug={recipe.slug} // Will be used for /recept/[slug]
-                            image={FlotiqImage.getSrc(recipe.image && recipe.image[0], 300, 200)} // Adjust size as needed
+                            slug={recipe.slug}
+                            image={FlotiqImage.getSrc(recipe.image && recipe.image[0], 300, 200)}
                             cookingTime={recipe.cookingTime}
                             servings={recipe.servings}
-                            // tags are not directly in your core recipe JSON for now, but could be added
                         />
                     ))}
                 </div>
@@ -91,9 +92,9 @@ const SilviakakaPillarPage = ({ recipesInSilo }) => {
         </Layout>
     );
 };
-
 export async function getStaticProps() {
-    const allRecipesResponse = await getRecipe(1, 100); // Fetch a large number to get all
+    const { translations } = await getTranslations();
+    const allRecipesResponse = await getRecipe(1, 100); 
     const allRecipes = replaceUndefinedWithNull(allRecipesResponse.data);
     
     const recipesInSilo = allRecipes.filter(recipe => 
@@ -106,10 +107,20 @@ export async function getStaticProps() {
         if (b.slug === 'silviakaka') return 1;
         return a.name.localeCompare(b.name); // Then alphabetical
     });
+const pageContentPath = path.join(process.cwd(), 'data', 'pageContent.json');
+    const allContent = JSON.parse(fs.readFileSync(pageContentPath, 'utf-8'));
+    
+    const siteConfigPath = path.join(process.cwd(), 'data', 'siteConfig.json');
+    const siteConfig = JSON.parse(fs.readFileSync(siteConfigPath, 'utf-8'));
 
     return {
         props: {
             recipesInSilo,
+            translations,
+            pageContent: {
+                ...allContent.silviakakaGuide,
+                lang: siteConfig.language
+            }
         },
     };
 }

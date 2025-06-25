@@ -1,0 +1,75 @@
+{
+  "about": {
+    "title": {
+      "sv": "Om Oss | Silviakaka",
+      "en": "About Us | Silviakaka"
+    },
+    "headline": {
+      "sv": "Möt Elsa Lundström",
+      "en": "Meet Elsa Lundström"
+    },
+    "meta_description": {
+      "sv": "Lär känna Elsa Lundström, kvinnan bakom Silviakaka.se, och hennes passion för svenska bakverk.",
+      "en": "Get to know Elsa Lundström, the woman behind Silviakaka.se, and her passion for Swedish pastries."
+    },
+    "body": {
+      "sv": "Välkommen hit till Silviakaka.se! Jag heter Elsa Lundström, och det är jag som med stor glädje delar med mig av mina allra bästa recept och baktips här på sidan. Jag växte upp på den småländska landsbygden, i ett hem där köket alltid var hjärtat och doften av nybakat bröd och kakor spred sig som en varm kram. Min mormor var en sann mästarinna på klassiska svenska bakverk, och det var hon som tände min passion för bakning. För mig ska bakning vara roligt, tillgängligt för alla och framför allt fyllt av kärlek. Jag tror på enkla, ärliga smaker och att de allra bästa recepten är de som delas vidare, från generation till generation.",
+      "en": "Welcome to Silviakaka.se! My name is Elsa Lundström, and it is with great pleasure that I share my very best recipes and baking tips here on the site. I grew up in the Småland countryside, in a home where the kitchen was always the heart and the scent of freshly baked bread and cakes spread like a warm hug. My grandmother was a true master of classic Swedish pastries, and she was the one who ignited my passion for baking. For me, baking should be fun, accessible to everyone, and above all, filled with love. I believe in simple, honest flavors and that the very best recipes are those that are passed on, from generation to generation."
+    }
+  },
+  "contact": {
+    "title": {
+      "sv": "Kontakta Oss | Silviakaka",
+      "en": "Contact Us | Silviakaka"
+    },
+    "headline": {
+      "sv": "Kontakta Oss",
+      "en": "Contact Us"
+    },
+    "meta_description": {
+      "sv": "Har du frågor, feedback eller vill du bara säga hej? Kontakta oss på Silviakaka.se. Vi ser fram emot att höra från dig!",
+      "en": "Do you have questions, feedback, or just want to say hello? Contact us at Silviakaka.se. We look forward to hearing from you!"
+    },
+    "body": {
+      "sv": "Vi på Silviakaka.se älskar att höra från våra läsare! Oavsett om du har en fråga om ett recept, ett förslag på en ny Silviakaka-variant, feedback på vår sajt, eller bara vill dela med dig av din bakglädje, är du varmt välkommen att kontakta oss. Det enklaste sättet att nå oss är via e-post.",
+      "en": "We at Silviakaka.se love to hear from our readers! Whether you have a question about a recipe, a suggestion for a new Silviakaka variation, feedback on our site, or just want to share your baking joy, you are warmly welcome to contact us. The easiest way to reach us is by email."
+    },
+    "email": "elsa@silviakaka.se"
+  },
+  "silviakakaGuide": {
+    "title": {
+      "sv": "Allt om Silviakaka - Recept & Tips",
+      "en": "All About Silviakaka - Recipes & Tips"
+    },
+    "headline": {
+      "sv": "Silviakaka – En Älskad Svensk Klassiker",
+      "en": "Silviakaka – A Beloved Swedish Classic"
+    },
+    "meta_description": {
+      "sv": "Din kompletta guide till Silviakaka! Upptäck klassiska recept, spännande variationer, och allt du behöver veta.",
+      "en": "Your complete guide to Silviakaka! Discover classic recipes, exciting variations, and everything you need to know."
+    },
+    "body": {
+      "sv": "Välkommen till den ultimata guiden för Silviakaka! Här på Silviakaka.se har vi samlat allt du behöver veta om denna otroligt populära och älskade svenska kaka. Från dess spännande historia till det klassiska grundreceptet, smarta baktips för att garantera en saftig kaka varje gång, och hur du gör den oemotståndliga smörkrämsglasyren.\nUtforska våra många recept nedan för att hitta din favoritvariant – oavsett om du vill baka den i långpanna, som muffins, glutenfri, vegansk, eller med spännande smaksättningar som saffran eller citron. Glad bakning!",
+      "en": "Welcome to the ultimate guide for Silviakaka! Here at Silviakaka.se, we have gathered everything you need to know about this incredibly popular and beloved Swedish cake. From its exciting history to the classic basic recipe, smart baking tips to guarantee a moist cake every time, and how to make the irresistible buttercream frosting.\nExplore our many recipes below to find your favorite variation – whether you want to bake it in a sheet pan, as muffins, gluten-free, vegan, or with exciting flavorings like saffron or lemon. Happy baking!"
+    }
+  },
+  "kladdkakaGuide": {
+    "title": {
+      "sv": "Allt om Kladdkaka - Recept & Tips",
+      "en": "All About Kladdkaka - Recipes & Tips"
+    },
+    "headline": {
+      "sv": "Kladdkaka – Sveriges Kladdigaste Favorit",
+      "en": "Kladdkaka – Sweden's Gooiest Favorite"
+    },
+    "meta_description": {
+      "sv": "Din kompletta guide till Kladdkaka! Upptäck klassiska recept, spännande variationer, och allt du behöver veta.",
+      "en": "Your complete guide to Kladdkaka! Discover classic recipes, exciting variations, and everything you need to know."
+    },
+    "body": {
+      "sv": "Välkommen till den ultimata guiden för alla kladdkakeälskare! Här har vi samlat allt du behöver veta om denna seglivade favorit. Lär dig historien bakom, få det klassiska grundreceptet, ovärderliga tips för perfekt kladdighet, och svar på vanliga frågor.\nBläddra bland våra recept nedan för att hitta just din kladdkakefavorit – oavsett om du söker den bästa, en glutenfri variant, vegansk, eller kanske en spännande vit kladdkaka.",
+      "en": "Welcome to the ultimate guide for all kladdkaka lovers! Here we have gathered everything you need to know about this persistent favorite. Learn the history behind it, get the classic basic recipe, invaluable tips for perfect gooiness, and answers to common questions.\nBrowse our recipes below to find your particular kladdkaka favorite – whether you're looking for the best, a gluten-free version, vegan, or perhaps an exciting white chocolate kladdkaka."
+    }
+  }
+}

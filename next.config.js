@@ -8,7 +8,7 @@ module.exports = withPlugins(
         withTM,
         withImages,
     ],
-    {
+    {   
 
         images: {
             imageSizes: [16, 32, 48, 64, 96, 128, 256, 384], // You can keep or remove if not needed

@@ -1,12 +1,14 @@
 import '../styles/globals.css';
 import Head from 'next/head';
-import { React, useEffect } from 'react';
 import Script from 'next/script';
 import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 import * as gtag from '../lib/gtag';
+import { TranslationProvider } from '../context/TranslationContext'; // استيراد Provider
 
 const MyApp = ({ Component, pageProps }) => {
     const router = useRouter();
+    
     useEffect(() => {
         const handleRouteChange = (url) => {
             gtag.pageview(url);
@@ -17,32 +19,38 @@ const MyApp = ({ Component, pageProps }) => {
         };
     }, [router.events]);
 
+    const { translations, ...restPageProps } = pageProps;
+
     return (
-        <div className="bg-dark-blue">
-            <Head>
-                <title>Silviakaka</title>
-              
-            </Head>
-            <Script
-                strategy="afterInteractive"
-                src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
-            />
-            {/* eslint-disable-next-line @next/next/inline-script-id */}
-            <Script
-                strategy="afterInteractive"
-                dangerouslySetInnerHTML={{
-                    __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${gtag.GA_TRACKING_ID}', {
-              page_path: window.location.pathname,
-            });
-          `,
-                }}
-            />
-            <Component {...pageProps} />
-        </div>
+        <TranslationProvider translations={translations || {}}>
+            <div className="bg-white">
+                <Head>
+                    <title>Silviakaka</title>
+                </Head>
+                
+                {/* Google Analytics Script */}
+                <Script
+                    strategy="afterInteractive"
+                    src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
+                />
+                <Script
+                    id="gtag-init"
+                    strategy="afterInteractive"
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${gtag.GA_TRACKING_ID}', {
+                  page_path: window.location.pathname,
+                });
+              `,
+                    }}
+                />
+                
+                <Component {...restPageProps} />
+            </div>
+        </TranslationProvider>
     );
 }
 
