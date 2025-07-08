@@ -19,7 +19,7 @@ const sora = Sora({
 });
 
 const Layout = ({
-    children, additionalClass = [], title, description, ogImage, ogType,
+    children, additionalClass = [], title, description, ogImage, ogType,allRecipesForSearch 
 }) => {
     // Use specific title/description if provided, otherwise fallback to siteMetadata
     const pageTitle = title || config.siteMetadata.title;
@@ -48,7 +48,7 @@ const Layout = ({
                 <meta name="twitter:image" content={imageUrl} key="twitterimage" />
             <link rel="icon" href="/favicon.png" />
             </Head>
-            <PageHeader />
+            <PageHeader allRecipesForSearch={allRecipesForSearch} />
             {children}
             <Footer />
         </main>

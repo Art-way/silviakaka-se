@@ -4,13 +4,13 @@ import Layout from '../../layouts/layout';
 import config from '../../lib/config';
 import RecipeCards from '../../sections/RecipeCards';
 import CustomPagination from '../../components/CustomPagination';
-import { getRecipe } from '../../lib/recipe';
+import { getRecipe, getAllRecipes } from '../../lib/recipe';
 import replaceUndefinedWithNull from '../../lib/sanitize';
 import { Header, Paragraph } from 'flotiq-components-react';
 import { getRecipePageLink } from '../../lib/utils';
 import { getTranslations } from '../../lib/translations'; // استيراد دالة الترجمة
 import { useTranslation } from '../../context/TranslationContext'; // استيراد الهوك
-const RecipeIndexPage = ({ recipes, pageContext }) => {
+const RecipeIndexPage = ({ recipes, pageContext, allRecipes }) => {
       const { t } = useTranslation();
     const pageTitle = `Alla Våra Recept | ${config.siteMetadata.title}`; // Page 1 doesn't need "Sida 1"
     const pageDescription = `Bläddra bland alla läckra recept på ${config.siteMetadata.title}. Upptäck nya favoriter!`;
@@ -37,7 +37,7 @@ const RecipeIndexPage = ({ recipes, pageContext }) => {
     };
 
     return (
-        <Layout title={pageTitle} description={pageDescription}>
+        <Layout title={pageTitle} description={pageDescription} allRecipesForSearch={allRecipes}>
             <Head>
                 <link rel="canonical" href={canonicalUrl} />
                 <script
@@ -76,10 +76,14 @@ const RecipeIndexPage = ({ recipes, pageContext }) => {
 
 export async function getStaticProps() {
     const { translations } = await getTranslations();
-    const page = 1; // This page is always page 1
+    const page = 1;
     const recipesPerPage = config.blog.postPerPage;
     const recipesResponse = await getRecipe(page, recipesPerPage, undefined, 'desc', 'datePublished');
     
+    // جلب جميع الوصفات للبحث
+    const allRecipesResponse = await getAllRecipes();
+    const allRecipesForSearch = allRecipesResponse ? replaceUndefinedWithNull(allRecipesResponse.data) : [];
+
     const sanitizedRecipes = replaceUndefinedWithNull(recipesResponse.data);
     
     return {
@@ -90,7 +94,8 @@ export async function getStaticProps() {
                 numPages: recipesResponse.total_pages,
                 recipesPerPage: recipesPerPage
             },
-            translations, // تمرير الترجمات إلى الصفحة
+            allRecipes: allRecipesForSearch, // مرر بيانات البحث
+            translations,
         },
     };
 }

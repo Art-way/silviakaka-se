@@ -14,7 +14,21 @@ module.exports = withPlugins(
             imageSizes: [16, 32, 48, 64, 96, 128, 256, 384], // You can keep or remove if not needed
             dangerouslyAllowSVG: true,
             disableStaticImages: true, // Recommended to be true for next/image with remote patterns or loader
-            remotePatterns: [], // No remote patterns needed if all images are local
+            remotePatterns: [
+            {
+                protocol: 'http',
+                hostname: 'localhost',
+                port: '3000', // تأكد من أن هذا هو البورت الذي تستخدمه في التطوير
+                pathname: '/images/**', // اسمح بكل الصور في مجلد /images
+            },
+            
+            {
+                 protocol: 'https',
+                 hostname: 'silviakaka.se',
+                port: '',
+                pathname: '/images/**',
+         },
+        ], // No remote patterns needed if all images are local
         },
         webpack: (config, options) => {
             if (!options.isServer) {

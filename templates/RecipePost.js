@@ -52,7 +52,7 @@ const IngredientChecklist = ({ ingredients }) => {
 };
 
 
-const RecipeTemplate = ({ post, pageContext }) => {
+const RecipeTemplate = ({ post, pageContext, allRecipes }) => {
     const { t } = useTranslation();
 
     // Check if post data is available before rendering
@@ -99,6 +99,7 @@ const RecipeTemplate = ({ post, pageContext }) => {
 
     return (
         <Layout
+         allRecipesForSearch={allRecipes} 
             additionalClass={['bg-light-gray']}
             title={recipe.name}
             description={recipe.description.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...'}

@@ -6,13 +6,12 @@ import Image from 'next/image';
 import config from '../lib/config';
 import { useRouter } from 'next/router';
 import SearchWidget from './SearchWidget';
-import { getAllRecipes } from '../lib/recipe';
+
 import { useTranslation } from '../context/TranslationContext'; // استيراد الهوك
 
-const PageHeader = () => {
-    const { t } = useTranslation(); // استخدام الهوك
+const PageHeader = ({ allRecipesForSearch = [] }) => {
+    const { t } = useTranslation();
     const router = useRouter();
-    const [allRecipesForSearch, setAllRecipesForSearch] = useState([]);
 
     const navigationLinks = [
         { name: t('home'), href: '/', type: 'link' },
@@ -30,15 +29,7 @@ const PageHeader = () => {
         { name: t('contact_us'), href: '/kontakta-oss', type: 'link' },
     ];
 
-    useEffect(() => {
-        const fetchAllDataForSearch = async () => {
-            const recipeData = await getAllRecipes();
-            if (recipeData && recipeData.data) {
-                setAllRecipesForSearch(recipeData.data);
-            }
-        };
-        fetchAllDataForSearch();
-    }, []);
+    // تم حذف `useEffect` الذي كان يجلب البيانات من هنا
 
     function classNames(...classes) {
         return classes.filter(Boolean).join(' ');

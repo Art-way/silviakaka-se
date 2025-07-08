@@ -7,8 +7,10 @@ import { useTranslation } from '../context/TranslationContext';
 import { getTranslations } from '../lib/translations';
 import fs from 'fs';
 import path from 'path';
+import { getAllRecipes } from '../lib/recipe'; // Import
+import replaceUndefinedWithNull from '../lib/sanitize'; // Import
 
-const OmOssPage = ({ pageContent }) => {
+const OmOssPage = ({ pageContent, allRecipes }) => {
     const { t } = useTranslation();
 
     // دالة مساعدة للحصول على النص باللغة الصحيحة
@@ -22,7 +24,7 @@ const OmOssPage = ({ pageContent }) => {
     };
     
     return (
-        <Layout title={translateContent(pageContent.title)} description={translateContent(pageContent.meta_description)}>
+        <Layout title={translateContent(pageContent.title)} description={translateContent(pageContent.meta_description)} allRecipesForSearch={allRecipes}>
             <Head>
                 {/* Add any additional meta tags if needed */}
             </Head>
@@ -57,27 +59,27 @@ const OmOssPage = ({ pageContent }) => {
 };
 
 export async function getStaticProps() {
-    // جلب الترجمات العامة للواجهة
     const { translations } = await getTranslations();
-
-    // جلب محتوى هذه الصفحة تحديداً
     const pageContentPath = path.join(process.cwd(), 'data', 'pageContent.json');
     const allContent = JSON.parse(fs.readFileSync(pageContentPath, 'utf-8'));
-    
-    // جلب لغة الموقع الحالية من الإعدادات
     const siteConfigPath = path.join(process.cwd(), 'data', 'siteConfig.json');
     const siteConfig = JSON.parse(fs.readFileSync(siteConfigPath, 'utf-8'));
 
+    // جلب جميع الوصفات للبحث
+    const allRecipesResponse = await getAllRecipes();
+    const allRecipesForSearch = allRecipesResponse ? replaceUndefinedWithNull(allRecipesResponse.data) : [];
 
     return {
         props: {
             translations,
             pageContent: {
                 ...allContent.about,
-                lang: siteConfig.language // تمرير اللغة الحالية إلى الصفحة
-            }
+                lang: siteConfig.language
+            },
+            allRecipes: allRecipesForSearch, // مرر بيانات البحث
         },
     };
 }
+
 
 export default OmOssPage;

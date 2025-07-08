@@ -3,33 +3,14 @@ import Head from 'next/head';
 import Layout from '../layouts/layout';
 import { Header, Paragraph } from 'flotiq-components-react';
 import RecipeCard from '../components/RecipeCard';
-import { getRecipe } from '../lib/recipe';
-import replaceUndefinedWithNull from '../lib/sanitize';
 import FlotiqImage from '../lib/FlotiqImage';
-import { getTranslations } from '../lib/translations';
 import { useTranslation } from '../context/TranslationContext';
-import fs from 'fs';
-import path from 'path';
+
 import config from '../lib/config'; // <-- تم إضافة هذا السطر لتصحيح الخطأ
 // Define which slugs belong to the Silviakaka silo
-const silviakakaRecipeSlugs = [
-    "silviakaka", // The classic recipe itself
-    "silviakaka-langpanna",
-    "silviakaka-rund-springform",
-    "silviakaka-med-saffran",
-    "glutenfri-silviakaka",
-    "vegansk-silviakaka-utan-agg",
-    "silviakaka-med-citron",
-    "silviakaka-toppings-variationer",
-    "silviakaka-muffins",
-    "silviakaka-sockerkaksform",
-    "silviakaka-pernilla-wahlgren",
-    "silviakaka-langpanna-fredriks-fika",
-    "silviakaka-leila",
-    "silviakaka-lindas-bakskola"
-];
 
-const SilviakakaPillarPage = ({ recipesInSilo, pageContent }) => {
+
+const SilviakakaPillarPage = ({ recipesInSilo, pageContent, allRecipes }) => {
        const { t } = useTranslation();
 
     // دالة مساعدة للحصول على النص باللغة الصحيحة
@@ -53,7 +34,7 @@ const SilviakakaPillarPage = ({ recipesInSilo, pageContent }) => {
     };
 
     return (
-        <Layout title={translateContent(pageContent.title)} description={translateContent(pageContent.meta_description)}>
+        <Layout title={translateContent(pageContent.title)} description={translateContent(pageContent.meta_description)} allRecipesForSearch={allRecipes}>
             <Head>
                 <script
                     type="application/ld+json"
@@ -93,21 +74,42 @@ const SilviakakaPillarPage = ({ recipesInSilo, pageContent }) => {
     );
 };
 export async function getStaticProps() {
-    const { translations } = await getTranslations();
-    const allRecipesResponse = await getRecipe(1, 100); 
-    const allRecipes = replaceUndefinedWithNull(allRecipesResponse.data);
-    
-    const recipesInSilo = allRecipes.filter(recipe => 
-        silviakakaRecipeSlugs.includes(recipe.slug)
-    );
+    // استورد هنا بدلاً من الأعلى
+    const { getAllRecipes } = await import('../lib/recipe');
+    const { getTranslations } = await import('../lib/translations');
+    const fs = await import('fs');
+    const path = await import('path');
+    const replaceUndefinedWithNull = (await import('../lib/sanitize')).default;
 
-    // Optional: Sort recipesInSilo if needed, e.g., classic first
-    recipesInSilo.sort((a, b) => {
-        if (a.slug === 'silviakaka') return -1; // Classic Silviakaka first
+    const { translations } = await getTranslations();
+    const allRecipesResponse = await getAllRecipes();
+    const allRecipesData = replaceUndefinedWithNull(allRecipesResponse.data);
+    
+    const silviakakaRecipeSlugs = [
+    "silviakaka", // The classic recipe itself
+    "silviakaka-langpanna",
+    "silviakaka-rund-springform",
+    "silviakaka-med-saffran",
+    "glutenfri-silviakaka",
+    "vegansk-silviakaka-utan-agg",
+    "silviakaka-med-citron",
+    "silviakaka-toppings-variationer",
+    "silviakaka-muffins",
+    "silviakaka-sockerkaksform",
+    "silviakaka-pernilla-wahlgren",
+    "silviakaka-langpanna-fredriks-fika",
+    "silviakaka-leila",
+    "silviakaka-lindas-bakskola"
+];
+    
+    const recipesInSilo = allRecipesData.filter(recipe => 
+        silviakakaRecipeSlugs.includes(recipe.slug)
+    ).sort((a, b) => {
+        if (a.slug === 'silviakaka') return -1;
         if (b.slug === 'silviakaka') return 1;
-        return a.name.localeCompare(b.name); // Then alphabetical
+        return a.name.localeCompare(b.name);
     });
-const pageContentPath = path.join(process.cwd(), 'data', 'pageContent.json');
+ const pageContentPath = path.join(process.cwd(), 'data', 'pageContent.json');
     const allContent = JSON.parse(fs.readFileSync(pageContentPath, 'utf-8'));
     
     const siteConfigPath = path.join(process.cwd(), 'data', 'siteConfig.json');
@@ -120,7 +122,8 @@ const pageContentPath = path.join(process.cwd(), 'data', 'pageContent.json');
             pageContent: {
                 ...allContent.silviakakaGuide,
                 lang: siteConfig.language
-            }
+            },
+            allRecipes: allRecipesData,
         },
     };
 }

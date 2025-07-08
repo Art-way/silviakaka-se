@@ -35,7 +35,7 @@ const SearchPage = ({ allRecipes }) => { // Tar emot alla recept som prop
         : `Sök bland hundratals läckra recept på ${config.siteMetadata.title}.`;
 
     return (
-        <Layout title={pageTitle} description={pageDescription}>
+        <Layout title={pageTitle} description={pageDescription}  allRecipesForSearch={allRecipes}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <Header level={1} additionalClasses={['text-3xl md:text-4xl font-semibold mb-8']}>
                     {searchTerm ? `Sökresultat för: "${searchTerm}"` : 'Sök Recept'}

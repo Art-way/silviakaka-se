@@ -6,8 +6,10 @@ import { useTranslation } from '../context/TranslationContext';
 import { getTranslations } from '../lib/translations';
 import fs from 'fs';
 import path from 'path';
+import { getAllRecipes } from '../lib/recipe'; // Import
+import replaceUndefinedWithNull from '../lib/sanitize';
 
-const ContactUsPage = ({ pageContent }) => {
+const ContactUsPage = ({ pageContent, allRecipes  }) => {
     const { t } = useTranslation();
 
     const translateContent = (field) => {
@@ -23,7 +25,7 @@ const ContactUsPage = ({ pageContent }) => {
     };
 
     return (
-        <Layout title={translateContent(pageContent.title)} description={translateContent(pageContent.meta_description)}>
+        <Layout title={translateContent(pageContent.title)} description={translateContent(pageContent.meta_description)} allRecipesForSearch={allRecipes}>
             <Head>
                 {/* Meta tags */}
             </Head>
@@ -85,13 +87,18 @@ export async function getStaticProps() {
     const siteConfigPath = path.join(process.cwd(), 'data', 'siteConfig.json');
     const siteConfig = JSON.parse(fs.readFileSync(siteConfigPath, 'utf-8'));
 
+    // جلب جميع الوصفات للبحث
+    const allRecipesResponse = await getAllRecipes();
+    const allRecipesForSearch = allRecipesResponse ? replaceUndefinedWithNull(allRecipesResponse.data) : [];
+
     return {
         props: {
             translations,
             pageContent: {
                 ...allContent.contact,
                 lang: siteConfig.language
-            }
+            },
+            allRecipes: allRecipesForSearch, // مرر بيانات البحث
         },
     };
 }

@@ -10,7 +10,7 @@ import { Header, Paragraph } from 'flotiq-components-react';
 import { getRecipePageLink } from '../../../lib/utils';
 import { getTranslations } from '../../../lib/translations'; // استيراد دالة الترجمة
 import { useTranslation } from '../../../context/TranslationContext'; // استيراد الهوك
-const RecipeListPage = ({ recipes, pageContext }) => { // Renamed component
+const RecipeListPage = ({ recipes, pageContext, allRecipes }) => { // Renamed component
     const { t } = useTranslation();
     const pageTitle = `Alla Våra Recept - Sida ${pageContext.currentPage} | ${config.siteMetadata.title}`;
     const pageDescription = `Bläddra bland alla läckra recept på ${config.siteMetadata.title}. Sida ${pageContext.currentPage} av ${pageContext.numPages}.`;
@@ -37,7 +37,7 @@ const RecipeListPage = ({ recipes, pageContext }) => { // Renamed component
     };
 
     return (
-        <Layout title={pageTitle} description={pageDescription}>
+        <Layout title={pageTitle} description={pageDescription} allRecipesForSearch={allRecipes}>
             <Head>
                 <link rel="canonical" href={canonicalUrl} />
                 <script
@@ -80,17 +80,21 @@ const RecipeListPage = ({ recipes, pageContext }) => { // Renamed component
 export async function getStaticProps({ params }) {
     const { translations } = await getTranslations();
     const page = parseInt(params.pageNumber, 10);
-    if (isNaN(page) || page < 2) { // Validate page number
+    if (isNaN(page) || page < 2) {
         return { notFound: true };
     }
-    // ... rest of your getStaticProps logic to fetch data for 'page' ...
+    
     const recipesPerPage = config.blog.postPerPage;
     const recipesResponse = await getRecipe(page, recipesPerPage, undefined, 'desc', 'datePublished');
     const sanitizedRecipes = replaceUndefinedWithNull(recipesResponse.data);
 
-    if (sanitizedRecipes.length === 0) { // No recipes for this page (e.g., page > numPages)
+    if (sanitizedRecipes.length === 0) {
         return { notFound: true };
     }
+
+    // جلب جميع الوصفات للبحث
+    const allRecipesResponse = await getAllRecipes();
+    const allRecipesForSearch = allRecipesResponse ? replaceUndefinedWithNull(allRecipesResponse.data) : [];
     
     return {
         props: {
@@ -100,8 +104,9 @@ export async function getStaticProps({ params }) {
                 numPages: recipesResponse.total_pages,
                 totalRecipesOnPage: recipesResponse.count,
                 recipesPerPage: recipesPerPage
-          },
-            translations, // تمرير الترجمات إلى الصفحة
+            },
+            allRecipes: allRecipesForSearch, // مرر بيانات البحث
+            translations,
         },
     };
 }
@@ -111,11 +116,12 @@ export async function getStaticPaths() {
     const numPages = Math.ceil(recipesResponse.total_count / config.blog.postPerPage);
     const paths = [];
 
-    for (let i = 2; i <= numPages; i += 1) { // Start loop from 2
+    for (let i = 2; i <= numPages; i += 1) {
         paths.push({
             params: { pageNumber: i.toString() },
         });
     }
     return { paths, fallback: false };
 }
+
 export default RecipeListPage;

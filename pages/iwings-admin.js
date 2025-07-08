@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import { PlusIcon, TrashIcon, CogIcon, SparklesIcon, BookOpenIcon, DocumentTextIcon, PencilAltIcon, ChevronDownIcon, ChevronUpIcon, ChevronLeftIcon, ChevronRightIcon, ClipboardCopyIcon } from '@heroicons/react/outline';
 import { useTranslation } from '../context/TranslationContext';
-
+import RichTextEditor from '../components/RichTextEditor';
 // --- Helper Hook for Secure API Calls ---
 const useSecureFetch = () => {
     const getToken = () => typeof window !== 'undefined' ? localStorage.getItem('admin-token') : null;
@@ -92,6 +92,7 @@ const ImageUploader = ({ onUpload, currentImageUrl, label }) => {
 
 
 // --- AddRecipeForm Component ---
+// --- RecipeForm Component (النسخة الكاملة والمحدثة) ---
 const RecipeForm = ({ t, initialData, onSave }) => {
     const secureFetch = useSecureFetch();
     const initialRecipeState = { id: '', name: '', slug: '', image: [], steps: [{ step: '', image: [] }], servings: '', cookingTime: 'PTM', prepTime: 'PTM', totalTime: 'PTM', description: '', recipeCategory: '', recipeCuisine: '', keywords: '', datePublished: new Date().toISOString().split('T')[0], ingredients: [{ unit: '', amount: '', product: '' }], aggregateRating: { "@type": "AggregateRating", "ratingValue": "4.5", "ratingCount": "1" }, nutrition: { "@type": "NutritionInformation", "calories": "" }};
@@ -101,7 +102,9 @@ const RecipeForm = ({ t, initialData, onSave }) => {
     const [message, setMessage] = useState('');
 
     useEffect(() => {
-        setRecipe(initialData || initialRecipeState);
+        // عندما يتغير initialData، قم بتحديث الفورم. تأكد من أن حقل الوصف لا يكون null أو undefined.
+        const currentData = initialData || initialRecipeState;
+        setRecipe({ ...currentData, description: currentData.description || '' });
         setIsEditing(!!initialData);
     }, [initialData]);
     
@@ -113,6 +116,11 @@ const RecipeForm = ({ t, initialData, onSave }) => {
         } else {
              setRecipe(prev => ({ ...prev, [name]: value }));
         }
+    };
+    
+    // دالة جديدة خاصة بمحرر النصوص
+    const handleDescriptionChange = (content) => {
+        setRecipe(prev => ({ ...prev, description: content }));
     };
 
     const handleListChange = (index, event, listName) => {
@@ -133,42 +141,73 @@ const RecipeForm = ({ t, initialData, onSave }) => {
     };
     
     const handleImageUpload = (url, listName, index) => {
-        if(listName) { // For steps
+        if(listName) {
             const list = [...recipe[listName]];
             list[index].image = [{ id: `step-img-${Date.now()}`, url, extension: url.split('.').pop(), width: 1200, height: 800, alt: list[index].step }];
             setRecipe({ ...recipe, [listName]: list });
-        } else { // For main recipe image
+        } else {
             setRecipe(prev => ({...prev, image: [{ id: `main-img-${Date.now()}`, url, extension: url.split('.').pop(), width: 1200, height: 800, alt: prev.name }]}));
         }
     };
     
-       const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
         const method = isEditing ? 'PUT' : 'POST';
+        let recipeToSave = { ...recipe };
+
+        if (isEditing && initialData && initialData.slug !== recipe.slug) {
+            const oldSlugs = initialData.slugHistory || [];
+            if (!oldSlugs.includes(initialData.slug)) {
+                recipeToSave.slugHistory = [...oldSlugs, initialData.slug];
+            }
+        }
+        
+        const revalidatePaths = async (slug) => {
+            const pathsToRevalidate = ['/', '/recept', '/sok', '/silviakaka', '/kladdkaka', `/recept/${slug}`];
+            setMessage('بدء تحديث صفحات الموقع... قد يستغرق الأمر لحظات.');
+            for (const path of pathsToRevalidate) {
+                try {
+                    await fetch(`/api/revalidate?secret=${process.env.NEXT_PUBLIC_REVALIDATE_SECRET_TOKEN}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ path: path }),
+                    });
+                } catch (err) {
+                    console.error(`Failed to revalidate ${path}`, err);
+                }
+            }
+        };
+
         try {
             await secureFetch('/api/recipes', {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(recipe),
+                body: JSON.stringify(recipeToSave),
             });
-            setMessage(`Receptet har ${isEditing ? 'uppdaterats' : 'lagts till'}! Kom ihåg att bygga om webbplatsen.`);
-            if (!isEditing) {
-                setRecipe(initialRecipeState); // Reset form only if adding
+
+            await revalidatePaths(recipeToSave.slug);
+
+            if (isEditing && initialData && initialData.slug !== recipeToSave.slug) {
+                 await revalidatePaths(initialData.slug);
             }
-            onSave(); // Callback to refresh recipe list
+
+            setMessage('تم حفظ الوصفة وتحديث الموقع بنجاح!');
+            if (!isEditing) {
+                setRecipe(initialRecipeState);
+            }
+            onSave();
         } catch (error) {
             setMessage(`Fel: ${error.message}`);
         }
     };
 
     const handleJsonImport = (event) => {
-         const fileReader = new FileReader();
+        const fileReader = new FileReader();
         fileReader.readAsText(event.target.files[0], "UTF-8");
         fileReader.onload = e => {
             try {
                 const importedRecipe = JSON.parse(e.target.result);
-                // Simple validation
                 if(importedRecipe.name && importedRecipe.slug){
                     setRecipe(importedRecipe);
                     setMessage("Receptet har laddats in i formuläret. Granska och spara.");
@@ -184,20 +223,32 @@ const RecipeForm = ({ t, initialData, onSave }) => {
     return (
         <div className="space-y-8">
            <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold">{isEditing ? `Redigera: ${recipe.name}` : t('add_new_recipe')}</h3>
+                <h3 className="text-xl font-semibold">{isEditing ? `Redigera: ${recipe.name}` : t('add_new_recipe')}</h3>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input name="name" value={recipe.name} onChange={handleChange} placeholder={t('recipe_name')} className="p-2 border rounded" required />
                     <input name="slug" value={recipe.slug} placeholder={t('url_slug')} className="p-2 border rounded bg-gray-100" readOnly />
                 </div>
-                 <ImageUploader onUpload={(url) => handleImageUpload(url)} currentImageUrl={recipe.image[0]?.url} label={t('main_image')} />
                 
+                <ImageUploader onUpload={(url) => handleImageUpload(url)} currentImageUrl={recipe.image?.[0]?.url} label={t('main_image')} />
+                
+                {/* --- هذا هو الجزء الذي تم تعديله --- */}
+                <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Beskrivning</label>
+                    <RichTextEditor 
+                        value={recipe.description} 
+                        onChange={handleDescriptionChange} 
+                    />
+                </div>
+                {/* --- نهاية الجزء المعدل --- */}
+
                 <div>
                     <h4 className="font-semibold mb-2">{t('ingredients')}</h4>
                     {recipe.ingredients.map((ing, index) => (
                         <div key={index} className="flex items-center gap-2 mb-2">
-                            <input name="amount" value={ing.amount} onChange={e => handleListChange(index, e, 'ingredients')} placeholder="Mängd" type="text" className="p-2 border rounded w-1/4" />
-                            <input name="unit" value={ing.unit} onChange={e => handleListChange(index, e, 'ingredients')} placeholder="Enhet" className="p-2 border rounded w-1/4" />
-                            <input name="product" value={ing.product} onChange={e => handleListChange(index, e, 'ingredients')} placeholder="Ingrediens" className="p-2 border rounded w-2/4" required/>
+                            <input name="amount" value={ing.amount || ''} onChange={e => handleListChange(index, e, 'ingredients')} placeholder="Mängd" type="text" className="p-2 border rounded w-1/4" />
+                            <input name="unit" value={ing.unit || ''} onChange={e => handleListChange(index, e, 'ingredients')} placeholder="Enhet" className="p-2 border rounded w-1/4" />
+                            <input name="product" value={ing.product || ''} onChange={e => handleListChange(index, e, 'ingredients')} placeholder="Ingrediens" className="p-2 border rounded w-2/4" required/>
                             <button type="button" onClick={() => removeListItem(index, 'ingredients')}><TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700"/></button>
                         </div>
                     ))}
@@ -228,7 +279,6 @@ const RecipeForm = ({ t, initialData, onSave }) => {
         </div>
     );
 };
-
 
 // --- SettingsForm Component ---
 const SettingsForm = ({ t }) => {
@@ -457,108 +507,134 @@ const PageEditorForm = ({ t }) => {
 // --- ManageRecipesTab Component ---
 // (مكون جديد بالكامل)
     const ManageRecipesTab = ({ t, onEdit }) => {
-        const secureFetch = useSecureFetch();
-        const [recipes, setRecipes] = useState([]);
-        const [loading, setLoading] = useState(true);
-        const [error, setError] = useState('');
-        const [expandedId, setExpandedId] = useState(null);
-        
-        // --- New State for Pagination ---
-        const [currentPage, setCurrentPage] = useState(1);
-        const recipesPerPage = 20; // يمكنك تغيير هذا الرقم
+    const secureFetch = useSecureFetch();
+    const [recipes, setRecipes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [expandedId, setExpandedId] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const recipesPerPage = 20;
+    const [message, setMessage] = useState('');
 
-        const fetchRecipes = async () => {
-            setLoading(true);
+    // الخطوة 1: لف الدالة بـ useCallback
+    const fetchRecipes = useCallback(async () => {
+        setLoading(true);
+        setError(''); // أضف هذا لتنظيف الأخطاء القديمة
+        try {
+            const data = await secureFetch('/api/recipes');
+            setRecipes(data);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [secureFetch]); // الخطوة 2: أضف secureFetch كاعتمادية لـ useCallback
+
+    useEffect(() => {
+        fetchRecipes();
+    }, [fetchRecipes]); // الآن fetchRecipes مستقرة ولن تسبب حلقة لا نهائية
+
+      const handleDelete = async (recipeId, recipeName) => {
+        if (window.confirm(`Är du säker på att du vill ta bort receptet "${recipeName}"?`)) {
             try {
-                const data = await secureFetch('/api/recipes');
-                setRecipes(data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
+                const recipeToDelete = recipes.find(r => r._id === recipeId);
+                
+                // *** الآن استخدام setMessage يعمل بشكل صحيح ***
+                setMessage('جارٍ حذف الوصفة وتحديث الموقع...'); 
 
-        useEffect(() => {
-            fetchRecipes();
-        }, []);
+                await secureFetch(`/api/recipes?id=${recipeId}`, { method: 'DELETE' });
 
-        const handleDelete = async (recipeId, recipeName) => {
-            if (window.confirm(`Är du säker på att du vill ta bort receptet "${recipeName}"?`)) {
-                try {
-                    await secureFetch(`/api/recipes?id=${recipeId}`, { method: 'DELETE' });
-                    fetchRecipes(); // Refresh list after delete
-                } catch (err) {
-                    alert(`Kunde inte ta bort recept: ${err.message}`);
+                if (recipeToDelete) {
+                    const pathsToRevalidate = [
+                        '/', '/recept', '/sok', '/silviakaka',
+                        '/kladdkaka', `/recept/${recipeToDelete.slug}`
+                    ];
+                    
+                    for (const path of pathsToRevalidate) {
+                        await fetch(`/api/revalidate?secret=${process.env.NEXT_PUBLIC_REVALIDATE_SECRET_TOKEN}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ path: path }),
+                        });
+                    }
                 }
+                
+                await fetchRecipes(); // تحديث القائمة في لوحة التحكم
+                setMessage('تم حذف الوصفة وتحديث الموقع بنجاح.');
+                // يمكننا إزالة الـ alert الآن
+                // alert('تم حذف الوصفة وتحديث الموقع بنجاح.');
+
+            } catch (err) {
+                setMessage(`فشل الحذف: ${err.message}`);
+                // alert(`Kunde inte ta bort recept: ${err.message}`);
             }
-        };
+        }
+    };
 
         // --- Pagination Logic ---
-        const indexOfLastRecipe = currentPage * recipesPerPage;
-        const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
-        const currentRecipes = recipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
-        const totalPages = Math.ceil(recipes.length / recipesPerPage);
+         const indexOfLastRecipe = currentPage * recipesPerPage;
+    const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
+    const currentRecipes = recipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
+    const totalPages = Math.ceil(recipes.length / recipesPerPage);
 
-        const paginate = (pageNumber) => setCurrentPage(pageNumber);
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-        if (loading) return <p>Laddar recept...</p>;
-        if (error) return <p className="text-red-500">Fel: {error}</p>;
-
-        return (
-            <div className="space-y-4 bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold">Hantera Recept ({recipes.length} totalt)</h3>
-                <div className="space-y-2">
-                    {currentRecipes.map(recipe => (
-                        <div key={recipe.id} className="border rounded-lg overflow-hidden">
-                            <div className="p-3 bg-gray-50 flex justify-between items-center">
-                                <span className="font-semibold">{recipe.name}</span>
-                                <div className="flex items-center gap-3">
-                                    <button onClick={() => onEdit(recipe)} className="text-blue-600 hover:underline text-sm p-1 flex items-center gap-1"><PencilAltIcon className="h-4 w-4"/> Redigera</button>
-                                    <button onClick={() => handleDelete(recipe.id, recipe.name)} className="text-red-600 hover:underline text-sm p-1 flex items-center gap-1"><TrashIcon className="h-4 w-4"/> Ta bort</button>
-                                    <button onClick={() => setExpandedId(expandedId === recipe.id ? null : recipe.id)}>
-                                        {expandedId === recipe.id ? <ChevronUpIcon className="h-5 w-5"/> : <ChevronDownIcon className="h-5 w-5"/>}
-                                    </button>
-                                </div>
+    return (
+        <div className="space-y-4 bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-semibold">Hantera Recept ({recipes.length} totalt)</h3>
+            {message && <p className="text-center my-2 p-2 bg-yellow-100 text-yellow-800 rounded">{message}</p>}
+            <div className="space-y-2">
+                {currentRecipes.map(recipe => (
+                    <div key={recipe._id} className="border rounded-lg overflow-hidden">
+                        <div className="p-3 bg-gray-50 flex justify-between items-center">
+                            <span className="font-semibold">{recipe.name}</span>
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => onEdit(recipe)} className="text-blue-600 hover:underline text-sm p-1 flex items-center gap-1"><PencilAltIcon className="h-4 w-4"/> Redigera</button>
+                                <button onClick={() => handleDelete(recipe._id, recipe.name)} className="text-red-600 hover:underline text-sm p-1 flex items-center gap-1"><TrashIcon className="h-4 w-4"/> Ta bort</button>
+                                <button onClick={() => setExpandedId(expandedId === recipe._id ? null : recipe._id)}>
+                                    {expandedId === recipe._id ? <ChevronUpIcon className="h-5 w-5"/> : <ChevronDownIcon className="h-5 w-5"/>}
+                                </button>
                             </div>
-                            {expandedId === recipe.id && (
-                                <div className="p-4 border-t text-sm text-gray-700">
-                                    <p><strong>ID:</strong> {recipe.id}</p>
-                                    <p><strong>Publicerad:</strong> {recipe.datePublished}</p>
-                                    <p><strong>Kategori:</strong> {recipe.recipeCategory}</p>
-                                </div>
-                            )}
                         </div>
-                    ))}
-                </div>
-
-                {/* --- Pagination UI --- */}
-                {totalPages > 1 && (
-                    <div className="flex justify-between items-center pt-4 border-t">
-                        <button
-                            onClick={() => paginate(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md disabled:opacity-50 flex items-center gap-2"
-                        >
-                            <ChevronLeftIcon className="h-5 w-5" />
-                            Föregående
-                        </button>
-                        <span className="text-sm font-semibold">
-                            Sida {currentPage} av {totalPages}
-                        </span>
-                        <button
-                            onClick={() => paginate(currentPage + 1)}
-                            disabled={indexOfLastRecipe >= recipes.length}
-                            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md disabled:opacity-50 flex items-center gap-2"
-                        >
-                            Nästa
-                            <ChevronRightIcon className="h-5 w-5" />
-                        </button>
+                        {expandedId === recipe._id && (
+                            <div className="p-4 border-t text-sm text-gray-700">
+                                <p><strong>MongoDB ID:</strong> {recipe._id}</p>
+                                <p><strong>Slug ID:</strong> {recipe.id}</p>
+                                <p><strong>Publicerad:</strong> {new Date(recipe.datePublished).toLocaleDateString()}</p>
+                                <p><strong>Kategori:</strong> {recipe.recipeCategory}</p>
+                            </div>
+                        )}
                     </div>
-                )}
+                ))}
             </div>
-        );
-    };
+
+            {/* Pagination UI */}
+            {totalPages > 1 && (
+                <div className="flex justify-between items-center pt-4 border-t">
+                    <button
+                        onClick={() => paginate(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md disabled:opacity-50 flex items-center gap-2"
+                    >
+                        <ChevronLeftIcon className="h-5 w-5" />
+                        Föregående
+                    </button>
+                    <span className="text-sm font-semibold">
+                        Sida {currentPage} av {totalPages}
+                    </span>
+                    <button
+                        onClick={() => paginate(currentPage + 1)}
+                        disabled={indexOfLastRecipe >= recipes.length}
+                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md disabled:opacity-50 flex items-center gap-2"
+                    >
+                        Nästa
+                        <ChevronRightIcon className="h-5 w-5" />
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
 
     // --- AIToolsTab Component ---
 const AIToolsTab = ({ t }) => {

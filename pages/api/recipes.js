@@ -1,7 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-
-const recipesFilePath = path.join(process.cwd(), 'data', 'recipes.json');
+// pages/api/recipes.js
+import { connectToDatabase } from '../../lib/mongodb';
+import { ObjectId } from 'mongodb';
 
 const verifyToken = (req) => {
     const token = req.headers.authorization?.split(' ')[1];
@@ -13,69 +12,65 @@ export default async function handler(req, res) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const readRecipes = () => JSON.parse(fs.readFileSync(recipesFilePath, 'utf8'));
-    const writeRecipes = (data) => fs.writeFileSync(recipesFilePath, JSON.stringify(data, null, 2));
+    try {
+        const { db } = await connectToDatabase();
+        const recipesCollection = db.collection('recipes');
 
-    switch (req.method) {
-        case 'GET':
-            try {
-                const recipes = readRecipes();
-                // الترتيب حسب تاريخ النشر، من الأحدث إلى الأقدم
-                recipes.sort((a, b) => new Date(b.datePublished) - new Date(a.datePublished));
+        switch (req.method) {
+            case 'GET': { // <--- القوس الافتتاحي
+                const recipes = await recipesCollection.find({})
+                                                      .sort({ datePublished: -1 })
+                                                      .toArray();
                 res.status(200).json(recipes);
-            } catch (error) {
-                res.status(500).json({ message: 'Could not read recipes file.' });
-            }
-            break;
+                break;
+            } // <--- القوس الختامي
 
-        case 'POST': // إضافة وصفة جديدة
-            try {
+            case 'POST': { // <--- القوس الافتتاحي
                 const newRecipe = req.body;
-                const recipes = readRecipes();
-                recipes.unshift(newRecipe); // إضافة الوصفة في بداية القائمة
-                writeRecipes(recipes);
-                res.status(200).json({ message: 'Recipe added successfully!' });
-            } catch (error) {
-                res.status(500).json({ message: 'Could not write to recipes file.', error: error.message });
-            }
-            break;
+                delete newRecipe._id; 
+                const result = await recipesCollection.insertOne(newRecipe);
+                res.status(201).json({ message: 'Recipe added successfully!', insertedId: result.insertedId });
+                break;
+            } // <--- القوس الختامي
             
-        case 'PUT': // تعديل وصفة موجودة
-            try {
-                const updatedRecipe = req.body;
-                let recipes = readRecipes();
-                const recipeIndex = recipes.findIndex(r => r.id === updatedRecipe.id);
-                if (recipeIndex === -1) {
-                    return res.status(404).json({ message: 'Recipe not found.' });
+            case 'PUT': { // <--- القوس الافتتاحي
+                const { _id, ...updatedRecipeData } = req.body;
+                if (!_id) {
+                    return res.status(400).json({ message: 'Recipe _id is required for update.' });
                 }
-                recipes[recipeIndex] = updatedRecipe;
-                writeRecipes(recipes);
+                const result = await recipesCollection.updateOne(
+                    { _id: new ObjectId(_id) },
+                    { $set: updatedRecipeData }
+                );
+                
+                if (result.matchedCount === 0) {
+                     return res.status(404).json({ message: 'Recipe not found.' });
+                }
                 res.status(200).json({ message: 'Recipe updated successfully!' });
-            } catch (error) {
-                 res.status(500).json({ message: 'Could not update recipe.', error: error.message });
-            }
-            break;
+                break;
+            } // <--- القوس الختامي
             
-        case 'DELETE': // حذف وصفة
-            try {
+            case 'DELETE': { // <--- القوس الافتتاحي
                 const { id } = req.query;
                 if (!id) {
                      return res.status(400).json({ message: 'Recipe ID is required.' });
                 }
-                let recipes = readRecipes();
-                const newRecipes = recipes.filter(r => r.id !== id);
-                if (recipes.length === newRecipes.length) {
+                const result = await recipesCollection.deleteOne({ _id: new ObjectId(id) });
+                
+                if (result.deletedCount === 0) {
                     return res.status(404).json({ message: 'Recipe not found.' });
                 }
-                writeRecipes(newRecipes);
                 res.status(200).json({ message: 'Recipe deleted successfully!' });
-            } catch (error) {
-                res.status(500).json({ message: 'Could not delete recipe.', error: error.message });
-            }
-            break;
+                break;
+            } // <--- القوس الختامي
 
-        default:
-            res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
-            res.status(405).end(`Method ${req.method} Not Allowed`);
+            default:
+                res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+                res.status(405).end(`Method ${req.method} Not Allowed`);
+        }
+    } catch (error) {
+        // هذا سيمسك أي خطأ، بما في ذلك أخطاء الاتصال بقاعدة البيانات
+        console.error("API Error in /api/recipes:", error);
+        res.status(500).json({ message: 'An internal server error occurred.', error: error.message });
     }
 }

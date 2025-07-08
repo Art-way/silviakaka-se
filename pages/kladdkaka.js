@@ -3,33 +3,15 @@ import Head from 'next/head';
 import Layout from '../layouts/layout';
 import { Header, Paragraph } from 'flotiq-components-react';
 import RecipeCard from '../components/RecipeCard';
-import { getRecipe } from '../lib/recipe';
-import replaceUndefinedWithNull from '../lib/sanitize';
 import FlotiqImage from '../lib/FlotiqImage';
-import { getTranslations } from '../lib/translations';
 import { useTranslation } from '../context/TranslationContext';
-import fs from 'fs';
-import path from 'path';
+
 import config from '../lib/config'; // <-- تم إضافة هذا السطر لتصحيح الخطأ
 
 // قائمة الـ slugs الخاصة بوصفات Kladdkaka
-const kladdkakaRecipeSlugs = [
-     "kladdkaka-recept", // The classic/pillar Kladdkaka recipe
-    "basta-kladdkaka-recept",
-    "glutenfri-kladdkaka-recept",
-    "kladdkaka-recept-arla",
-    "kladdkaka-recept-utan-agg",
-    "vegansk-kladdkaka-recept",
-    "kladdkaka-i-langpanna-recept",
-    "kladdkaka-recept-utan-smor",
-    "vit-kladdkaka-recept",
-    "kladdkaka-recept-med-choklad",
-    "kladdkaka-recept-koket",
-    "camilla-hamid-kladdkaka-recept",
-    "kladdkaka-i-mugg-recept"
-];
 
-const KladdkakaPillarPage = ({ recipesInSilo, pageContent }) => {
+
+const KladdkakaPillarPage = ({ recipesInSilo, pageContent, allRecipes }) => {
     const { t } = useTranslation();
 const itemListSchema = {
         "@context": "https://schema.org",
@@ -51,7 +33,7 @@ const itemListSchema = {
     };
     
     return (
-        <Layout title={translateContent(pageContent.title)} description={translateContent(pageContent.meta_description)}>
+        <Layout title={translateContent(pageContent.title)} description={translateContent(pageContent.meta_description)} allRecipesForSearch={allRecipes}>
             <Head>
                 <script
                     type="application/ld+json"
@@ -92,11 +74,34 @@ const itemListSchema = {
 };
 
 export async function getStaticProps() {
+    // استورد الدوال التي تحتاجها هنا، داخل getStaticProps فقط
+    const { getAllRecipes } = await import('../lib/recipe');
+    const { getTranslations } = await import('../lib/translations');
+    const fs = await import('fs');
+    const path = await import('path');
+    const replaceUndefinedWithNull = (await import('../lib/sanitize')).default;
+
     const { translations } = await getTranslations();
-    const allRecipesResponse = await getRecipe(1, 100); 
-    const allRecipes = replaceUndefinedWithNull(allRecipesResponse.data);
+    const allRecipesResponse = await getAllRecipes();
+    const allRecipesData = replaceUndefinedWithNull(allRecipesResponse.data);
     
-    const recipesInSilo = allRecipes.filter(recipe => 
+ const kladdkakaRecipeSlugs = [
+     "kladdkaka-recept", // The classic/pillar Kladdkaka recipe
+    "basta-kladdkaka-recept",
+    "glutenfri-kladdkaka-recept",
+    "kladdkaka-recept-arla",
+    "kladdkaka-recept-utan-agg",
+    "vegansk-kladdkaka-recept",
+    "kladdkaka-i-langpanna-recept",
+    "kladdkaka-recept-utan-smor",
+    "vit-kladdkaka-recept",
+    "kladdkaka-recept-med-choklad",
+    "kladdkaka-recept-koket",
+    "camilla-hamid-kladdkaka-recept",
+    "kladdkaka-i-mugg-recept"
+];
+
+    const recipesInSilo = allRecipesData.filter(recipe => 
         kladdkakaRecipeSlugs.includes(recipe.slug)
     ).sort((a,b) => a.name.localeCompare(b.name));
 
@@ -106,7 +111,6 @@ export async function getStaticProps() {
     const siteConfigPath = path.join(process.cwd(), 'data', 'siteConfig.json');
     const siteConfig = JSON.parse(fs.readFileSync(siteConfigPath, 'utf-8'));
 
-
     return {
         props: {
             recipesInSilo,
@@ -114,11 +118,10 @@ export async function getStaticProps() {
             pageContent: {
                 ...allContent.kladdkakaGuide,
                 lang: siteConfig.language
-            }
+            },
+            allRecipes: allRecipesData,
         },
     };
 }
 
 export default KladdkakaPillarPage;
-
-   

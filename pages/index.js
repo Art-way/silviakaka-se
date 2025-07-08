@@ -4,7 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import Layout from '../layouts/layout';
-import { getRecipe } from '../lib/recipe';
+import { getRecipe, getAllRecipes } from '../lib/recipe';
 import replaceUndefinedWithNull from '../lib/sanitize';
 import { Button } from 'flotiq-components-react';
 import { StarIcon } from '@heroicons/react/solid';
@@ -47,7 +47,7 @@ const RecipeCard = ({ recipe }) => {
 };
 
 
-const HomePage = ({ featuredRecipe, latestRecipes }) => {
+const HomePage = ({ featuredRecipe, latestRecipes, allRecipes }) => {
     const { t } = useTranslation(); // الآن يجب أن يعمل هذا بشكل صحيح
 
     if (!featuredRecipe) {
@@ -61,7 +61,7 @@ const HomePage = ({ featuredRecipe, latestRecipes }) => {
     }
     
     return (
-        <Layout>
+       <Layout allRecipesForSearch={allRecipes}>
             <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center text-center bg-gray-700 text-white">
                 <Image
                     src={featuredRecipe.image?.[0]?.url || '/images/placeholder.jpg'}
@@ -121,9 +121,12 @@ export async function getStaticProps() {
     
     try {
         const recipesResponse = await getRecipe(1, 4, undefined, 'desc', 'datePublished');
+        // جلب جميع الوصفات للبحث
+        const allRecipesResponse = await getAllRecipes();
+        const allRecipesForSearch = allRecipesResponse ? replaceUndefinedWithNull(allRecipesResponse.data) : [];
 
         if (!recipesResponse || !recipesResponse.data || recipesResponse.data.length === 0) {
-            return { props: { featuredRecipe: null, latestRecipes: [], translations } };
+            return { props: { featuredRecipe: null, latestRecipes: [], allRecipes: allRecipesForSearch, translations } };
         }
 
         const allRecipes = replaceUndefinedWithNull(recipesResponse.data);
@@ -134,12 +137,13 @@ export async function getStaticProps() {
             props: {
                 featuredRecipe,
                 latestRecipes,
+                allRecipes: allRecipesForSearch, // مرر بيانات البحث
                 translations,
             },
         };
     } catch(error) {
          console.error("Error in getStaticProps for index page:", error);
-         return { props: { featuredRecipe: null, latestRecipes: [], translations } };
+         return { props: { featuredRecipe: null, latestRecipes: [], allRecipes: [], translations } };
     }
 }
 
