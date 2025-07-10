@@ -1,12 +1,7 @@
-# google adsense
-google.com, pub-9653005764752290, DIRECT, f08c47fec0942fa0
-
-# Header Bidding Agency 
+# HBAgency , silviakaka 
 # info@hbagency.it
-managerdomain=hbagency.it
-ownerdomain=silviakaka.se
-headerbidding.agency, 23209, DIRECT
-hbagency.it, 23209, DIRECT
+managerdomain=hbagency.it 
+ownerdomain=silviakaka.se 
 google.com, pub-5849238611809526, RESELLER, f08c47fec0942fa0
 smartadserver.com, 3278, RESELLER, 060d053dcf45cbf3
 smartadserver.com, 3278-OB, RESELLER, 060d053dcf45cbf3
@@ -601,6 +596,7 @@ spotx.tv, 212457, RESELLER, 7842df1d2fe2db34
 pubmatic.com, 156557, RESELLER, 5d62403b186f2ace
 pubmatic.com, 158723, RESELLER, 5d62403b186f2ace
 adyoulike.com,6eadf6f250a955010f6cffcb7f0dcfab, RESELLER
+adform.com,3296,RESELLER,9f5210a2f0999e32
 thebrave.io, 1234679, DIRECT, c25b2154543746ac
 yieldmo.com, 3732919948490514514, RESELLER
 loopme.com, 11480, RESELLER, 6c8d5f95897a5a3b
@@ -647,8 +643,8 @@ loopme.com, 11362, RESELLER, 6c8d5f95897a5a3b
 richaudience.com, JAHJ4YZq4O, RESELLER
 vistarsagency.com, cqqccatc23j9v5bv3fv0, RESELLER, 8db795910158017c
 Xapads.com, 196344, RESELLER
-video.unrulymedia.com, 2444764291, RESELLER,
-krushmedia.com, AJxF6R572a9M6CaTvK, RESELLER,
+video.unrulymedia.com, 2444764291, RESELLER
+krushmedia.com, AJxF6R572a9M6CaTvK, RESELLER
 inmobi.com, b01aa06531c543d8a5fb9982f60afb00, RESELLER, 83e75a7ae333ca9d
 pubmatic.com, 160295, RESELLER, 5d62403b186f2ace
 xandr.com, 14082, RESELLER
@@ -832,7 +828,7 @@ e-planning.net,d10f279de454138d,DIRECT,c1ba615865ed87b2
 smilewanted.com, 3924, RESELLER
 pubmatic.com, 158810, RESELLER, 5d62403b186f2ace
 appnexus.com, 10040, RESELLER
-smartadserver.com, 2491, RESELLER,
+smartadserver.com, 2491, RESELLER
 rubiconproject.com, 19814, RESELLER, 0bfd66d529a55807
 openx.com, 557083110, RESELLER, 6a698e2ec38604c6
 lijit.com, 346012, DIRECT, fafdf38b16bf6b2b
@@ -966,4 +962,48 @@ pubmatic.com, 81564, RESELLER, 5d62403b186f2ace
 pubmatic.com, 156538, RESELLER, 5d62403b186f2ace
 rubiconproject.com, 13510, RESELLER
 appnexus.com, 8233, RESELLER
-# End Header Bidding Agency 
+monetixads.com, mix-pub-5794198591, DIRECT, uufps1dh5stc6euk
+rubiconproject.com, 27026, RESELLER, 0bfd66d529a55807
+rubiconproject.com, 25100, RESELLER, 0bfd66d529a55807
+adform.com, 2083, RESELLER
+pubmatic.com, 158849, RESELLER, 5d62403b186f2ace
+flashb.id, 6607c9e6-936f-576c-ad5c-70c865f20c2a, DIRECT
+viously.com, c614e072-225a-53e5-8025-2fd7865a5987, DIRECT
+rubiconproject.com, 20922, RESELLER, 0bfd66d529a55807
+rubiconproject.com, 22416, RESELLER, 0bfd66d529a55807
+smartadserver.com, 3389, RESELLER, 060d053dcf45cbf3
+smartadserver.com, 4163, RESELLER
+sharethrough.com, 332baa08, RESELLER, d53b998a7bd4ecd2
+sharethrough.com, t9TEAe3b, RESELLER, d53b998a7bd4ecd2
+pubmatic.com, 160107, RESELLER, 5d62403b186f2ace
+pubmatic.com, 162545, RESELLER, 5d62403b186f2ace
+risecodes.com, 65b9125633dab2000102902c, RESELLER
+risecodes.com, 68347c1191b5ad0001b5a6fe, RESELLER
+xandr.com, 14082, RESELLER
+rubiconproject.com, 23876, RESELLER, 0bfd66d529a55807
+onetag.com, 69f48c2160c8113, RESELLER
+sharethrough.com, 5926d422, RESELLER, d53b998a7bd4ecd2
+media.net, 8CUQ6928Q, RESELLER
+pubmatic.com, 160295, RESELLER, 5d62403b186f2ace
+openx.com, 559913615, RESELLER, 6a698e2ec38604c6
+openx.com, 558414488, RESELLER, 6a698e2ec38604c6
+smilewanted.com, 2457, RESELLER
+appnexus.com, 10040, RESELLER
+adyoulike.com, bcf6c423bc90ec180005086dd9935a1b, RESELLER
+adyoulike.com, a71dd2266e84bab105b2ce336a9f1a70, RESELLER
+onetag.com, 5cca11704094eb8, RESELLER
+onetag.com, 7eef48de9069b7a, RESELLER
+appnexus.com, 11701, RESELLER
+appnexus.com, 10450, RESELLER, f5ab79cb980f11d1
+adform.com, 3125, RESELLER
+freewheel.tv, 1570215, RESELLER
+video.unrulymedia.com, 273421059, RESELLER
+video.unrulymedia.com, 3900851377692564083, RESELLER, a670c89d4a324e47
+amxrtb.com, 105199710, RESELLER
+improvedigital.com, 2154, RESELLER
+lijit.com, 447882, RESELLER, fafdf38b16bf6b2b
+triplelift.com, 9267, RESELLER, 6c33edb13117fd86
+media.net, 8CU507GON, RESELLER
+hbagency.it, 23209, DIRECT
+headerbidding.agency, 23209, DIRECT
+# End Header Bidding Agency

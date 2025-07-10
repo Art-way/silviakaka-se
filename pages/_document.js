@@ -1,4 +1,4 @@
-import Document, { Html, Head, Main, NextScript } from 'next/document';
+import Document, { Html, Head, Main, NextScript } from "next/document";
 
 class MyDocument extends Document {
   render() {
@@ -16,6 +16,11 @@ class MyDocument extends Document {
             }}
           />
           {/* End Google Tag Manager */}
+          {/* Prebid Script */}
+          <script
+            src="https://d3u598arehftfk.cloudfront.net/prebid_hb_14406_23209.js"
+            async
+          ></script>
         </Head>
         <body>
           {/* Google Tag Manager (noscript) */}
@@ -24,7 +29,7 @@ class MyDocument extends Document {
               src="https://www.googletagmanager.com/ns.html?id=GTM-THT22J2M"
               height="0"
               width="0"
-              style={{ display: 'none', visibility: 'hidden' }}
+              style={{ display: "none", visibility: "hidden" }}
             ></iframe>
           </noscript>
           {/* End Google Tag Manager (noscript) */}
