@@ -35,41 +35,5 @@
       "en": "We at Silviakaka.se love to hear from our readers! Whether you have a question about a recipe, a suggestion for a new Silviakaka variation, feedback on our site, or just want to share your baking joy, you are warmly welcome to contact us. The easiest way to reach us is by email."
     },
     "email": "elsa@silviakaka.se"
-  },
-  "silviakakaGuide": {
-    "title": {
-      "sv": "Allt om Silviakaka - Recept & Tips",
-      "en": "All About Silviakaka - Recipes & Tips"
-    },
-    "headline": {
-      "sv": "Silviakaka – En Älskad Svensk Klassiker",
-      "en": "Silviakaka – A Beloved Swedish Classic"
-    },
-    "meta_description": {
-      "sv": "Din kompletta guide till Silviakaka! Upptäck klassiska recept, spännande variationer, och allt du behöver veta.",
-      "en": "Your complete guide to Silviakaka! Discover classic recipes, exciting variations, and everything you need to know."
-    },
-    "body": {
-      "sv": "Välkommen till den ultimata guiden för Silviakaka! Här på Silviakaka.se har vi samlat allt du behöver veta om denna otroligt populära och älskade svenska kaka. Från dess spännande historia till det klassiska grundreceptet, smarta baktips för att garantera en saftig kaka varje gång, och hur du gör den oemotståndliga smörkrämsglasyren.\nUtforska våra många recept nedan för att hitta din favoritvariant – oavsett om du vill baka den i långpanna, som muffins, glutenfri, vegansk, eller med spännande smaksättningar som saffran eller citron. Glad bakning!",
-      "en": "Welcome to the ultimate guide for Silviakaka! Here at Silviakaka.se, we have gathered everything you need to know about this incredibly popular and beloved Swedish cake. From its exciting history to the classic basic recipe, smart baking tips to guarantee a moist cake every time, and how to make the irresistible buttercream frosting.\nExplore our many recipes below to find your favorite variation – whether you want to bake it in a sheet pan, as muffins, gluten-free, vegan, or with exciting flavorings like saffron or lemon. Happy baking!"
-    }
-  },
-  "kladdkakaGuide": {
-    "title": {
-      "sv": "Allt om Kladdkaka - Recept & Tips",
-      "en": "All About Kladdkaka - Recipes & Tips"
-    },
-    "headline": {
-      "sv": "Kladdkaka – Sveriges Kladdigaste Favorit",
-      "en": "Kladdkaka – Sweden's Gooiest Favorite"
-    },
-    "meta_description": {
-      "sv": "Din kompletta guide till Kladdkaka! Upptäck klassiska recept, spännande variationer, och allt du behöver veta.",
-      "en": "Your complete guide to Kladdkaka! Discover classic recipes, exciting variations, and everything you need to know."
-    },
-    "body": {
-      "sv": "Välkommen till den ultimata guiden för alla kladdkakeälskare! Här har vi samlat allt du behöver veta om denna seglivade favorit. Lär dig historien bakom, få det klassiska grundreceptet, ovärderliga tips för perfekt kladdighet, och svar på vanliga frågor.\nBläddra bland våra recept nedan för att hitta just din kladdkakefavorit – oavsett om du söker den bästa, en glutenfri variant, vegansk, eller kanske en spännande vit kladdkaka.",
-      "en": "Welcome to the ultimate guide for all kladdkaka lovers! Here we have gathered everything you need to know about this persistent favorite. Learn the history behind it, get the classic basic recipe, invaluable tips for perfect gooiness, and answers to common questions.\nBrowse our recipes below to find your particular kladdkaka favorite – whether you're looking for the best, a gluten-free version, vegan, or perhaps an exciting white chocolate kladdkaka."
-    }
   }
 }

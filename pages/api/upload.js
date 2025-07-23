@@ -1,17 +1,18 @@
+// pages/api/upload.js (MODIFIED FOR PRODUCTION)
 import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
 
-// Disable Next.js body parser for this route
 export const config = {
     api: {
         bodyParser: false,
     },
 };
 
-const uploadDir = path.join(process.cwd(), 'public', 'images', 'recipes');
+//  1. تغيير مسار الرفع إلى مجلد "uploads" خارج "public"
+const uploadDir = path.join(process.cwd(), 'uploads', 'recipes');
 
-// Ensure the upload directory exists
+// التأكد من وجود مجلد الرفع
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -30,15 +31,11 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
-    // --- THIS IS THE FIX ---
-    // Using the modern formidable v3+ API.
-    // We call formidable() directly to create the form instance.
     const form = formidable({
         uploadDir: uploadDir,
         keepExtensions: true,
         filename: (name, ext, part) => {
-            // Sanitize filename and make it unique
-            const sanitizedName = part.originalFilename.replace(/\s+/g, '_');
+            const sanitizedName = part.originalFilename.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '');
             return `${Date.now()}_${sanitizedName}`;
         }
     });
@@ -49,18 +46,16 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Error parsing the file upload.' });
         }
 
-        // 'file' is the name of the field in the FormData from the client.
-        // formidable v3+ returns an array for files, so we take the first element.
-        const file = files.file?.[0]; 
-
+        const file = files.file?.[0];
         if (!file) {
             return res.status(400).json({ error: "No file uploaded. Make sure the form field name is 'file'." });
         }
 
-        // The file is already saved to the uploadDir by formidable.
-        // We just need to construct the public path to return to the client.
-        const publicPath = `/images/recipes/${path.basename(file.filepath)}`;
+        // 2. بناء الرابط الجديد الذي يشير إلى API خدمة الصور
+        const imageName = path.basename(file.filepath);
+        const publicPath = `/api/images/recipes/${imageName}`;
         
+        // 3. إرجاع الرابط الجديد
         res.status(200).json({ url: publicPath });
     });
 }

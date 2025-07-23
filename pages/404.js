@@ -3,13 +3,19 @@ import React, { useRef } from 'react';
 import Link from 'next/link';
 import Button from 'flotiq-components-react/dist/components/Button/Button';
 import Layout from '../layouts/layout';
-import { getAllRecipes } from '../lib/recipe'; // Import
-import replaceUndefinedWithNull from '../lib/sanitize'; // Import
+import { getAllRecipes } from '../lib/recipe';
+import replaceUndefinedWithNull from '../lib/sanitize';
+import { getCategories } from '../lib/category'; // <-- ADDED
+
 const title = 'Page not found';
-const NotFoundPage = ({ allRecipes }) => {
+const NotFoundPage = ({ allRecipes, categories }) => { // <-- ADDED categories
     const ref = useRef();
     return (
-        <Layout title={title} allRecipesForSearch={allRecipes}>
+        <Layout 
+            title={title} 
+            allRecipesForSearch={allRecipes}
+            categories={categories} // <-- PASS categories
+        >
             <main className="flex flex-col h-screen justify-center items-center">
                 <Header alignment="center" additionalClasses={['my-20', '!py-20']}>
                     Page not found, sorry
@@ -23,14 +29,18 @@ const NotFoundPage = ({ allRecipes }) => {
         </Layout>
     );
 };
+
 export async function getStaticProps() {
-    // جلب جميع الوصفات للبحث حتى في صفحة الخطأ
     const recipeData = await getAllRecipes();
-    const allRecipes = recipeData && recipeData.data ? replaceUndefinedWithNull(recipeData.data) : [];
+    const allRecipes = recipeData?.data ? replaceUndefinedWithNull(recipeData.data) : [];
+    const categories = await getCategories(); // <-- FETCH categories
+
     return {
         props: {
             allRecipes,
+            categories: replaceUndefinedWithNull(categories) // <-- PASS categories
         },
     };
 }
+
 export default NotFoundPage;

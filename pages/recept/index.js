@@ -8,11 +8,13 @@ import { getRecipe, getAllRecipes } from '../../lib/recipe';
 import replaceUndefinedWithNull from '../../lib/sanitize';
 import { Header, Paragraph } from 'flotiq-components-react';
 import { getRecipePageLink } from '../../lib/utils';
-import { getTranslations } from '../../lib/translations'; // استيراد دالة الترجمة
-import { useTranslation } from '../../context/TranslationContext'; // استيراد الهوك
-const RecipeIndexPage = ({ recipes, pageContext, allRecipes }) => {
+import { getTranslations } from '../../lib/translations';
+import { useTranslation } from '../../context/TranslationContext';
+import { getCategories } from '../../lib/category'; // <-- ADDED
+
+const RecipeIndexPage = ({ recipes, pageContext, allRecipes, categories }) => { // <-- ADDED categories
       const { t } = useTranslation();
-    const pageTitle = `Alla Våra Recept | ${config.siteMetadata.title}`; // Page 1 doesn't need "Sida 1"
+    const pageTitle = `Alla Våra Recept | ${config.siteMetadata.title}`;
     const pageDescription = `Bläddra bland alla läckra recept på ${config.siteMetadata.title}. Upptäck nya favoriter!`;
     const canonicalUrl = `${config.siteMetadata.siteUrl}/recept`;
 
@@ -25,7 +27,7 @@ const RecipeIndexPage = ({ recipes, pageContext, allRecipes }) => {
         "numberOfItems": pageContext.totalRecipesOnPage,
         "itemListElement": recipes.map((recipe, index) => ({
             "@type": "ListItem",
-            "position": index + 1, // Position on this page (1 to recipesPerPage)
+            "position": index + 1,
             "item": {
                  "@type": "Recipe",
                  "name": recipe.name,
@@ -37,15 +39,19 @@ const RecipeIndexPage = ({ recipes, pageContext, allRecipes }) => {
     };
 
     return (
-        <Layout title={pageTitle} description={pageDescription} allRecipesForSearch={allRecipes}>
+        <Layout 
+            title={pageTitle} 
+            description={pageDescription} 
+            allRecipesForSearch={allRecipes}
+            categories={categories} // <-- PASS categories
+        >
             <Head>
                 <link rel="canonical" href={canonicalUrl} />
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
                 />
-                {/* No 'prev' link for page 1 */}
-                {pageContext.numPages > 1 && ( // Only add next if there are more pages
+                {pageContext.numPages > 1 && (
                     <link rel="next" href={`${config.siteMetadata.siteUrl}/recept/list/2`} /> 
                 )}
             </Head>
@@ -60,16 +66,13 @@ const RecipeIndexPage = ({ recipes, pageContext, allRecipes }) => {
                     <Paragraph>Inga recept att visa för tillfället.</Paragraph>
                 )}
 
-{pageContext.numPages > 1 && (
-    <CustomPagination
-        currentPage={1} // Explicitly page 1
-        numPages={pageContext.numPages} // Page 1 is /recept, Page 2 is /recept/2
+                {pageContext.numPages > 1 && (
+                    <CustomPagination
+                        currentPage={1}
+                        numPages={pageContext.numPages}
                     />
                 )}
             </div>
-            {pageContext.numPages > 1 && (
-                    <link rel="next" href={getRecipePageLink(2)} />
-                )}
         </Layout>
     );
 };
@@ -80,9 +83,9 @@ export async function getStaticProps() {
     const recipesPerPage = config.blog.postPerPage;
     const recipesResponse = await getRecipe(page, recipesPerPage, undefined, 'desc', 'datePublished');
     
-    // جلب جميع الوصفات للبحث
     const allRecipesResponse = await getAllRecipes();
     const allRecipesForSearch = allRecipesResponse ? replaceUndefinedWithNull(allRecipesResponse.data) : [];
+    const categories = await getCategories(); // <-- FETCH categories
 
     const sanitizedRecipes = replaceUndefinedWithNull(recipesResponse.data);
     
@@ -94,12 +97,11 @@ export async function getStaticProps() {
                 numPages: recipesResponse.total_pages,
                 recipesPerPage: recipesPerPage
             },
-            allRecipes: allRecipesForSearch, // مرر بيانات البحث
+            allRecipes: allRecipesForSearch,
             translations,
+            categories: replaceUndefinedWithNull(categories) // <-- PASS categories
         },
     };
 }
-
-// No getStaticPaths needed for pages/recept/index.js
 
 export default RecipeIndexPage;

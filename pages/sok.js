@@ -3,11 +3,12 @@ import { useRouter } from 'next/router';
 import Layout from '../layouts/layout';
 import { Header, Paragraph } from 'flotiq-components-react';
 import RecipeCards from '../sections/RecipeCards';
-import { getAllRecipes } from '../lib/recipe'; // För att hämta alla recept
+import { getAllRecipes } from '../lib/recipe';
 import config from '../lib/config';
 import replaceUndefinedWithNull from '../lib/sanitize';
+import { getCategories } from '../lib/category'; // <-- ADDED
 
-const SearchPage = ({ allRecipes }) => { // Tar emot alla recept som prop
+const SearchPage = ({ allRecipes, categories }) => { // <-- ADDED categories
     const router = useRouter();
     const { q: searchTerm } = router.query;
     const [searchResults, setSearchResults] = useState([]);
@@ -35,7 +36,12 @@ const SearchPage = ({ allRecipes }) => { // Tar emot alla recept som prop
         : `Sök bland hundratals läckra recept på ${config.siteMetadata.title}.`;
 
     return (
-        <Layout title={pageTitle} description={pageDescription}  allRecipesForSearch={allRecipes}>
+        <Layout 
+            title={pageTitle} 
+            description={pageDescription}  
+            allRecipesForSearch={allRecipes}
+            categories={categories} // <-- PASS categories
+        >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <Header level={1} additionalClasses={['text-3xl md:text-4xl font-semibold mb-8']}>
                     {searchTerm ? `Sökresultat för: "${searchTerm}"` : 'Sök Recept'}
@@ -61,13 +67,14 @@ const SearchPage = ({ allRecipes }) => { // Tar emot alla recept som prop
     );
 };
 
-// Hämta all receptdata vid build-time för att skicka som prop
 export async function getStaticProps() {
     const recipeData = await getAllRecipes();
-    const allRecipes = recipeData && recipeData.data ? replaceUndefinedWithNull(recipeData.data) : [];
+    const allRecipes = recipeData?.data ? replaceUndefinedWithNull(recipeData.data) : [];
+    const categories = await getCategories(); // <-- FETCH categories
     return {
         props: {
             allRecipes,
+            categories: replaceUndefinedWithNull(categories) // <-- PASS categories
         },
     };
 }

@@ -7,24 +7,27 @@ import { useTranslation } from '../context/TranslationContext';
 import { getTranslations } from '../lib/translations';
 import fs from 'fs';
 import path from 'path';
-import { getAllRecipes } from '../lib/recipe'; // Import
-import replaceUndefinedWithNull from '../lib/sanitize'; // Import
+import { getAllRecipes } from '../lib/recipe';
+import replaceUndefinedWithNull from '../lib/sanitize';
+import { getCategories } from '../lib/category'; // <-- ADDED
 
-const OmOssPage = ({ pageContent, allRecipes }) => {
+const OmOssPage = ({ pageContent, allRecipes, categories }) => { // <-- ADDED categories
     const { t } = useTranslation();
 
-    // دالة مساعدة للحصول على النص باللغة الصحيحة
     const translateContent = (field) => {
         if (typeof field === 'object' && field !== null) {
-            // ملاحظة: لا نستخدم locale من router هنا لأن الصفحة ثابتة
-            // اللغة يتم تحديدها أثناء البناء
             return field[pageContent.lang] || field['sv'];
         }
         return field;
     };
     
     return (
-        <Layout title={translateContent(pageContent.title)} description={translateContent(pageContent.meta_description)} allRecipesForSearch={allRecipes}>
+        <Layout 
+            title={translateContent(pageContent.title)} 
+            description={translateContent(pageContent.meta_description)} 
+            allRecipesForSearch={allRecipes}
+            categories={categories} // <-- PASS categories
+        >
             <Head>
                 {/* Add any additional meta tags if needed */}
             </Head>
@@ -46,7 +49,6 @@ const OmOssPage = ({ pageContent, allRecipes }) => {
                             className="rounded-full shadow-lg"
                         />
                     </div>
-                    {/* استخدام الفقرات المقسمة من النص */}
                     {translateContent(pageContent.body).split('\n').map((paragraph, index) => (
                          <Paragraph key={index} additionalClasses={['text-lg leading-relaxed']}>
                             {paragraph}
@@ -65,9 +67,9 @@ export async function getStaticProps() {
     const siteConfigPath = path.join(process.cwd(), 'data', 'siteConfig.json');
     const siteConfig = JSON.parse(fs.readFileSync(siteConfigPath, 'utf-8'));
 
-    // جلب جميع الوصفات للبحث
     const allRecipesResponse = await getAllRecipes();
     const allRecipesForSearch = allRecipesResponse ? replaceUndefinedWithNull(allRecipesResponse.data) : [];
+    const categories = await getCategories(); // <-- FETCH categories
 
     return {
         props: {
@@ -76,7 +78,8 @@ export async function getStaticProps() {
                 ...allContent.about,
                 lang: siteConfig.language
             },
-            allRecipes: allRecipesForSearch, // مرر بيانات البحث
+            allRecipes: allRecipesForSearch,
+            categories: replaceUndefinedWithNull(categories) // <-- PASS categories
         },
     };
 }

@@ -1,16 +1,18 @@
 import React from 'react';
 import Head from 'next/head';
-import Layout from '../../../layouts/layout'; // Path is now deeper
-import config from '../../../lib/config'; // Path is now deeper
-import RecipeCards from '../../../sections/RecipeCards'; // Path is now deeper
+import Layout from '../../../layouts/layout';
+import config from '../../../lib/config';
+import RecipeCards from '../../../sections/RecipeCards';
 import CustomPagination from '../../../components/CustomPagination';
-import { getRecipe, getAllRecipes } from '../../../lib/recipe'; // Path is now deeper
-import replaceUndefinedWithNull from '../../../lib/sanitize'; // Path is now deeper
+import { getRecipe, getAllRecipes } from '../../../lib/recipe';
+import replaceUndefinedWithNull from '../../../lib/sanitize';
 import { Header, Paragraph } from 'flotiq-components-react';
 import { getRecipePageLink } from '../../../lib/utils';
-import { getTranslations } from '../../../lib/translations'; // استيراد دالة الترجمة
-import { useTranslation } from '../../../context/TranslationContext'; // استيراد الهوك
-const RecipeListPage = ({ recipes, pageContext, allRecipes }) => { // Renamed component
+import { getTranslations } from '../../../lib/translations';
+import { useTranslation } from '../../../context/TranslationContext';
+import { getCategories } from '../../../lib/category'; // <-- ADDED
+
+const RecipeListPage = ({ recipes, pageContext, allRecipes, categories }) => { // <-- ADDED categories
     const { t } = useTranslation();
     const pageTitle = `Alla Våra Recept - Sida ${pageContext.currentPage} | ${config.siteMetadata.title}`;
     const pageDescription = `Bläddra bland alla läckra recept på ${config.siteMetadata.title}. Sida ${pageContext.currentPage} av ${pageContext.numPages}.`;
@@ -29,7 +31,7 @@ const RecipeListPage = ({ recipes, pageContext, allRecipes }) => { // Renamed co
             "item": {
                  "@type": "Recipe",
                  "name": recipe.name,
-                 "url": `${config.siteMetadata.siteUrl}/recept/${recipe.slug}`, // Individual recipes still at /recept/[slug]
+                 "url": `${config.siteMetadata.siteUrl}/recept/${recipe.slug}`,
                  "image": recipe.image && recipe.image[0] ? `${config.siteMetadata.siteUrl}${recipe.image[0].url}` : undefined,
                  "description": recipe.description ? recipe.description.replace(/<[^>]*>?/gm, '').substring(0,100) + '...' : undefined
             }
@@ -37,15 +39,18 @@ const RecipeListPage = ({ recipes, pageContext, allRecipes }) => { // Renamed co
     };
 
     return (
-        <Layout title={pageTitle} description={pageDescription} allRecipesForSearch={allRecipes}>
+        <Layout 
+            title={pageTitle} 
+            description={pageDescription} 
+            allRecipesForSearch={allRecipes}
+            categories={categories} // <-- PASS categories
+        >
             <Head>
                 <link rel="canonical" href={canonicalUrl} />
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
                 />
-                {/* Previous page link will be to /recept if current page is 2, else /recept/list/[page-1] */}
-                {/* This needs to be correct: page 1 is /recept, page 2 is /recept/list/2 */}
                 {pageContext.currentPage > 1 && (
                     <link rel="prev" href={getRecipePageLink(pageContext.currentPage - 1)} />
                 )}
@@ -65,14 +70,13 @@ const RecipeListPage = ({ recipes, pageContext, allRecipes }) => { // Renamed co
                     <Paragraph>Inga fler recept att visa.</Paragraph>
                 )}
 
-{pageContext.numPages > 1 && (
-    <CustomPagination
-        currentPage={pageContext.currentPage} // This will be 2, 3, etc.
-        numPages={pageContext.numPages}
-    />
+                {pageContext.numPages > 1 && (
+                    <CustomPagination
+                        currentPage={pageContext.currentPage}
+                        numPages={pageContext.numPages}
+                    />
                 )}
             </div>
-
         </Layout>
     );
 };
@@ -92,9 +96,9 @@ export async function getStaticProps({ params }) {
         return { notFound: true };
     }
 
-    // جلب جميع الوصفات للبحث
     const allRecipesResponse = await getAllRecipes();
     const allRecipesForSearch = allRecipesResponse ? replaceUndefinedWithNull(allRecipesResponse.data) : [];
+    const categories = await getCategories(); // <-- FETCH categories
     
     return {
         props: {
@@ -105,8 +109,9 @@ export async function getStaticProps({ params }) {
                 totalRecipesOnPage: recipesResponse.count,
                 recipesPerPage: recipesPerPage
             },
-            allRecipes: allRecipesForSearch, // مرر بيانات البحث
+            allRecipes: allRecipesForSearch,
             translations,
+            categories: replaceUndefinedWithNull(categories) // <-- PASS categories
         },
     };
 }

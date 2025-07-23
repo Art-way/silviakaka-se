@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
 import { MenuIcon, XIcon, ChevronDownIcon } from '@heroicons/react/outline';
@@ -6,37 +6,41 @@ import Image from 'next/image';
 import config from '../lib/config';
 import { useRouter } from 'next/router';
 import SearchWidget from './SearchWidget';
+import { useTranslation } from '../context/TranslationContext';
 
-import { useTranslation } from '../context/TranslationContext'; // استيراد الهوك
-
-const PageHeader = ({ allRecipesForSearch = [] }) => {
+const PageHeader = ({ allRecipesForSearch = [], categories = [] }) => {
     const { t } = useTranslation();
     const router = useRouter();
 
-    const navigationLinks = [
+    const staticLinks = [
         { name: t('home'), href: '/', type: 'link' },
-        {
-            name: t('recipes'),
-            type: 'dropdown',
-            href: '/recept',
-            subLinks: [
-                { name: t('all_recipes'), href: '/recept' },
-                { name: t('silviakaka_guide'), href: '/silviakaka' },
-                { name: t('kladdkaka_guide'), href: '/kladdkaka' },
-            ],
-        },
+    ];
+
+    // Build dynamic recipe dropdown links
+    const recipeDropdown = {
+        name: t('recipes'),
+        type: 'dropdown',
+        href: '/recept',
+        subLinks: [
+            { name: t('all_recipes'), href: '/recept' },
+            // Dynamically add categories from the database
+            ...categories.map(cat => ({ name: cat.name.sv, href: `/${cat.slug}` })),
+        ],
+    };
+
+    const navigationLinks = [
+        ...staticLinks,
+        recipeDropdown,
         { name: t('about_us'), href: '/om-oss', type: 'link' },
         { name: t('contact_us'), href: '/kontakta-oss', type: 'link' },
     ];
-
-    // تم حذف `useEffect` الذي كان يجلب البيانات من هنا
 
     function classNames(...classes) {
         return classes.filter(Boolean).join(' ');
     }
 
     return (
- <Disclosure as="nav" className="bg-white shadow-md sticky top-0 z-50">
+        <Disclosure as="nav" className="bg-white shadow-md sticky top-0 z-50">
             {({ open }) => (
                 <>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -142,7 +146,7 @@ const PageHeader = ({ allRecipesForSearch = [] }) => {
 
                     {/* Mobile menu panel */}
                     <Disclosure.Panel className="md:hidden border-t border-gray-200">
-                        <div className="pt-4 pb-3 px-3"> {/* Added horizontal padding to panel itself */}
+                        <div className="pt-4 pb-3 px-3">
                             <SearchWidget allRecipesData={allRecipesForSearch} placeholder="Sök recept..." />
                         </div>
                         <div className="pt-2 pb-3 space-y-1">
@@ -156,7 +160,7 @@ const PageHeader = ({ allRecipesForSearch = [] }) => {
                                             router.pathname === item.href 
                                             ? 'bg-secondary-50 border-secondary text-secondary' 
                                             : 'border-transparent text-gray-700 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800',
-                                            'block pl-3 pr-4 py-3 border-l-4 text-base font-medium rounded-r-md' // Added rounded-r-md
+                                            'block pl-3 pr-4 py-3 border-l-4 text-base font-medium rounded-r-md'
                                         )}
                                         aria-current={router.pathname === item.href ? 'page' : undefined}
                                     >
@@ -187,7 +191,7 @@ const PageHeader = ({ allRecipesForSearch = [] }) => {
                                                             href={subLink.href}
                                                             className={classNames(
                                                                 router.pathname === subLink.href ? 'bg-gray-100 text-secondary font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800',
-                                                                'block px-3 py-2 text-sm rounded-md w-full text-left' // Added px-3
+                                                                'block px-3 py-2 text-sm rounded-md w-full text-left'
                                                             )}
                                                         >
                                                             {subLink.name}

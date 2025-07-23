@@ -1,23 +1,24 @@
 import React from 'react';
-import RecipeTemplate from '../../templates/RecipePost'; // This will be used for ALL individual recipes
-import { getRecipeBySlug, getAllRecipeSlugs, getAllRecipes } from '../../lib/recipe'; // Updated imports
+import RecipeTemplate from '../../templates/RecipePost';
+import { getRecipeBySlug, getAllRecipeSlugs, getAllRecipes } from '../../lib/recipe';
 import replaceUndefinedWithNull from '../../lib/sanitize';
 import config from '../../lib/config';
 import { getTranslations } from '../../lib/translations';
+import { getCategories } from '../../lib/category'; // <-- ADDED
 
-// Renamed component to avoid conflict
-// It now receives `allRecipes` to pass down for the search functionality
-const RecipeDetailPage = ({ postData, pageContext, allRecipes }) => {
-    return <RecipeTemplate post={postData} pageContext={pageContext} allRecipes={allRecipes} />;
+const RecipeDetailPage = ({ postData, pageContext, allRecipes, categories }) => { // <-- ADDED categories
+    return <RecipeTemplate 
+                post={postData} 
+                pageContext={pageContext} 
+                allRecipes={allRecipes} 
+                categories={categories} // <-- PASS categories
+            />;
 };
 
 export async function getStaticProps({ params }) {
     const requestedSlug = params.slug;
-
-    // 1. جلب الوصفة (الدالة المعدلة ستبحث في slug و slugHistory)
     const recipeBySlugResponse = await getRecipeBySlug(requestedSlug);
 
-    // إذا لم يتم العثور على الوصفة، أرجع صفحة 404
     if (!recipeBySlugResponse || !recipeBySlugResponse.data || recipeBySlugResponse.data.length === 0) {
         return { notFound: true };
     }
@@ -25,25 +26,22 @@ export async function getStaticProps({ params }) {
     const recipeData = replaceUndefinedWithNull(recipeBySlugResponse.data[0]);
     const currentOfficialSlug = recipeData.slug;
 
-    // 2. *** منطق إعادة التوجيه ***
-    // إذا كان الـ slug المطلوب في الرابط لا يساوي الـ slug الرسمي الحالي للوصفة
     if (currentOfficialSlug !== requestedSlug) {
         return {
             redirect: {
-                destination: `/recept/${currentOfficialSlug}`, // وجه إلى الرابط الصحيح
-                permanent: true, // 301 Redirect (دائم)
+                destination: `/recept/${currentOfficialSlug}`,
+                permanent: true,
             },
         };
     }
-    // *** نهاية منطق إعادة التوجيه ***
 
-    // 3. إذا كان الرابط صحيحاً، أكمل كالمعتاد
     const otherRecipesResponse = await getAllRecipes();
     const sanitizedOtherRecipes = replaceUndefinedWithNull(otherRecipesResponse.data)
                                     .filter(recipe => recipe.slug !== recipeData.slug)
                                     .slice(0, config.blog.postPerPage);
     const allRecipesForSearch = replaceUndefinedWithNull(otherRecipesResponse.data);
     const { translations } = await getTranslations();
+    const categories = await getCategories(); // <-- FETCH categories
 
     return {
         props: {
@@ -53,8 +51,9 @@ export async function getStaticProps({ params }) {
             },
             allRecipes: allRecipesForSearch,
             translations,
+            categories: replaceUndefinedWithNull(categories) // <-- PASS categories
         },
-        revalidate: 60, // أعد التحقق من الصفحة كل 60 ثانية (جيد للأداء)
+        revalidate: 60,
     };
 }
 
@@ -65,7 +64,7 @@ export async function getStaticPaths() {
         paths: slugs.map((slug) => ({
             params: { slug },
         })),
-        fallback: 'blocking', // *** هذا هو التغيير الأهم ***
+        fallback: 'blocking',
     };
 }
 
