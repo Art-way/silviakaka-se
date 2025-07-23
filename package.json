@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 5005",
+    "start": "next start",
     "lint": "next lint",
     "lint:fix": "eslint --fix --ext .js,.jsx ."
   },
@@ -24,6 +24,7 @@
     "flotiq-components-react": "^2.0.1",
     "formidable": "^3.5.4",
     "highlight.js": "^11.10.0",
+    "mime": "^4.0.7",
     "mongodb": "^6.17.0",
     "next": "14.2.7",
     "next-compose-plugins": "^2.2.1",
@@ -36,6 +37,15 @@
     "react-helmet": "^6.1.0",
     "react-quill": "^2.0.0",
     "webpack": "^5.94.0"
+  },
+    "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "eslint --fix --ext .js,.jsx .",
+    "migrate:recipes": "node scripts/migrate-to-mongo.js", 
+    "migrate:categories": "node scripts/migrate-categories.js"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -62,6 +72,5 @@
     "postcss": "^8.4.44",
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.10"
-  },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  }
 }

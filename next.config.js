@@ -8,18 +8,28 @@ module.exports = withPlugins(
         withTM,
         withImages,
     ],
-    {   
+    {
+        async rewrites() {
+            return [
+                {
+                    // Update: removed silviakaka and kladdkaka from the negative lookahead
+                    // Now, URLs like /silviakaka will be correctly rewritten to be handled by the category page.
+                    source: '/:slug((?!recept|om-oss|kontakta-oss|sok|iwings-admin|api|_next|sitemap\\.xml).*)',
+                    destination: '/kategorier/:slug',
+                },
+            ];
+        },
 
         images: {
-            imageSizes: [16, 32, 48, 64, 96, 128, 256, 384], // You can keep or remove if not needed
+            imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
             dangerouslyAllowSVG: true,
-            disableStaticImages: true, // Recommended to be true for next/image with remote patterns or loader
+            disableStaticImages: true,
             remotePatterns: [
             {
                 protocol: 'http',
                 hostname: 'localhost',
-                port: '3000', // تأكد من أن هذا هو البورت الذي تستخدمه في التطوير
-                pathname: '/images/**', // اسمح بكل الصور في مجلد /images
+                port: '3000',
+                pathname: '/images/**',
             },
             
             {
@@ -28,11 +38,11 @@ module.exports = withPlugins(
                 port: '',
                 pathname: '/images/**',
          },
-        ], // No remote patterns needed if all images are local
+        ],
         },
         webpack: (config, options) => {
             if (!options.isServer) {
-                // config.resolve.alias['@sentry/node'] = '@sentry/browser' // Keep if using Sentry
+                // config.resolve.alias['@sentry/node'] = '@sentry/browser'
             }
             config.module.rules.push({
                 test: /\.svg$/,
