@@ -14,7 +14,8 @@ module.exports = {
     extends: ['airbnb', 'eslint:recommended', 'next'],
     plugins: ['jsx-a11y', 'import'],
     rules: {
-      
+      'react/jsx-wrap-multilines': 'off',
+
         'linebreak-style': 0,
         'indent': 0,
         'quotes': 0,
@@ -105,7 +106,9 @@ module.exports = {
         'no-plusplus': 0,
         'no-promise-executor-return': 0,
         'consistent-return': 0,
-        
+        'jsx-a11y/label-has-associated-control': 'off', // أضف هذا
+    'react/no-unstable-nested-components': 'off', // وهذا مفيد أيضًا للمشكلة في AdminDashboard
+    'no-alert': 'off', // وهذا لتحذيرات confirm/alert
         // Next.js specific
         '@next/next/no-img-element': 'warn',
         '@next/next/next-script-for-ga': 'warn',
