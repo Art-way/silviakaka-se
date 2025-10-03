@@ -33,6 +33,7 @@ const MyApp = ({ Component, pageProps }) => {
                     strategy="afterInteractive"
                     src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
                 />
+                    <script src="https://d3u598arehftfk.cloudfront.net/prebid_hb_14406_23209.js" async> </script>
                 <Script
                     id="gtag-init"
                     strategy="afterInteractive"
