@@ -33,7 +33,8 @@ const MyApp = ({ Component, pageProps }) => {
                     strategy="afterInteractive"
                     src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
                 />
-                   
+                   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9653005764752290"
+     crossorigin="anonymous"></script>
                 <Script
                     id="gtag-init"
                     strategy="afterInteractive"
