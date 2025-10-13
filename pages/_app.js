@@ -4,7 +4,7 @@ import Script from 'next/script';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import * as gtag from '../lib/gtag';
-import { TranslationProvider } from '../context/TranslationContext'; // استيراد Provider
+import { TranslationProvider } from '../context/TranslationContext'; 
 
 const MyApp = ({ Component, pageProps }) => {
     const router = useRouter();
@@ -29,6 +29,7 @@ const MyApp = ({ Component, pageProps }) => {
                 </Head>
                 
                 {/* Google Analytics Script */}
+
                 <Script
                     strategy="afterInteractive"
                     src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
@@ -49,6 +50,7 @@ const MyApp = ({ Component, pageProps }) => {
               `,
                     }}
                 />
+                    <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/5a807a9bcecc9e8c2e21556d/script.js"></script>
                 
                 <Component {...restPageProps} />
             </div>
