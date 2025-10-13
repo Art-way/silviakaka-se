@@ -76,15 +76,15 @@ const RecipeTemplate = ({ post, pageContext, allRecipes, categories }) => {
             <div className="flex flex-wrap max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
                 {/* --- 2. IMAGE STRETCH FIX --- */}
                 {/* By adding max-h-[600px] and making the container relative, we constrain the image's height */}
-                <div className="relative flex basis-full lg:basis-1/2 max-h-[600px]">
-                    <Image
-                        src={FlotiqImage.getSrc(recipe.image?.[0], 0, 0)}
-                        alt={recipe.name}
-                        layout="fill"
-                        objectFit="cover" // This will cover the container, cropping if necessary, but not stretching
-                        priority={true}
-                    />
-                </div>
+    <div className="relative w-full" style={{ paddingTop: '75%' /* 3/4 = 75% for a 4:3 ratio */ }}>
+        <Image
+            src={FlotiqImage.getSrc(recipe.image?.[0], 1200, 900)}
+            alt={recipe.name}
+            layout="fill"
+            className="object-cover absolute top-0 left-0 w-full h-full"
+            priority={true}
+        />
+    </div>
                 {/* --- END OF FIX --- */}
 
                 {/* --- 3. Use the new interactive component --- */}
