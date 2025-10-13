@@ -126,7 +126,13 @@ const Footer = ({ categories = [] }) => {
             {/* Sub-footer for Copyright */}
             <div className="bg-black bg-opacity-20 mt-8 py-4">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-400">
-                    <p>Copyright © {new Date().getFullYear()} {config.siteMetadata.title}. Alla rättigheter förbehållna.</p>
+                    <p>Copyright © {new Date().getFullYear()} {config.siteMetadata.title}. Alla rättigheter förbehållna.                 <Link href="/integritetspolicy" className="hover:text-yellow-600 hover:underline">
+                    Integritetspolicy
+                </Link>
+                <span className="text-gray-400 hidden sm:inline">|</span>
+                <Link href="/cookiepolicy" className="hover:text-yellow-600 hover:underline">
+                    Cookiepolicy
+                </Link></p>
                 </div>
             </div>
         </footer>
